@@ -1,0 +1,34 @@
+# Binarios compilados
+*.exe
+*.o
+*.a
+*.dll
+
+# Archivos de prueba y diagnóstico
+extract_log.txt
+test_delta.cpp
+test_delta.exe
+build_error.txt
+compile_err.txt
+err.txt
+
+# Archivos de compresión de prueba
+*.agz
+paquete.agz
+datos_origen.txt
+datos_restaurados.txt
+
+# Python cache
+__pycache__/
+*.pyc
+*.spec
+dist/
+build/
+
+# Assets de tamaño grande
+*.png
+*.ico
+*.bmp
+*.stl
+*.pdf
+*.zip
