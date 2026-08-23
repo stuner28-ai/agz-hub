@@ -1,0 +1,53 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "buildCommand": "npm run build",
+  "outputDirectory": "dist",
+  "trailingSlash": false,
+  "redirects": [
+    { "source": "/index.html", "destination": "/", "permanent": true },
+    { "source": "/monotributo.html", "destination": "/herramientas/monotributo", "permanent": true },
+    { "source": "/calculadora-monotributo.html", "destination": "/herramientas/monotributo", "permanent": true },
+    { "source": "/articulo-monotributo-2026.html", "destination": "/guias/monotributo-agosto-2026", "permanent": true },
+    { "source": "/margen.html", "destination": "/herramientas/margen-ganancia", "permanent": true },
+    { "source": "/calculadora-margen-ganancia.html", "destination": "/herramientas/margen-ganancia", "permanent": true },
+    { "source": "/iva.html", "destination": "/herramientas/iva", "permanent": true },
+    { "source": "/calculadora-iva.html", "destination": "/herramientas/iva", "permanent": true },
+    { "source": "/aguinaldo.html", "destination": "/herramientas/aguinaldo", "permanent": true },
+    { "source": "/calculadora-aguinaldo.html", "destination": "/herramientas/aguinaldo", "permanent": true },
+    { "source": "/equilibrio.html", "destination": "/herramientas/punto-equilibrio", "permanent": true },
+    { "source": "/calculadora-punto-equilibrio.html", "destination": "/herramientas/punto-equilibrio", "permanent": true },
+    { "source": "/roi.html", "destination": "/herramientas/roi-roas", "permanent": true },
+    { "source": "/calculadora-roi.html", "destination": "/herramientas/roi-roas", "permanent": true },
+    { "source": "/descuentos.html", "destination": "/herramientas/descuentos", "permanent": true },
+    { "source": "/calculadora-descuentos.html", "destination": "/herramientas/descuentos", "permanent": true },
+    { "source": "/interes.html", "destination": "/herramientas/interes-compuesto", "permanent": true },
+    { "source": "/calculadora-interes-compuesto.html", "destination": "/herramientas/interes-compuesto", "permanent": true },
+    { "source": "/articulo-interes-compuesto.html", "destination": "/herramientas/interes-compuesto", "permanent": true },
+    { "source": "/impresion3d.html", "destination": "/herramientas/costo-impresion-3d", "permanent": true },
+    { "source": "/calculadora-impresion-3d.html", "destination": "/herramientas/costo-impresion-3d", "permanent": true },
+    { "source": "/articulo-impresion-3d.html", "destination": "/herramientas/costo-impresion-3d", "permanent": true },
+    { "source": "/quienes-somos.html", "destination": "/equipo", "permanent": true },
+    { "source": "/sobre-nosotros.html", "destination": "/equipo", "permanent": true },
+    { "source": "/politica-privacidad.html", "destination": "/privacidad", "permanent": true },
+    { "source": "/contacto.html", "destination": "/contacto", "permanent": true },
+    { "source": "/guias.html", "destination": "/guias", "permanent": true },
+    { "source": "/blog.html", "destination": "/guias", "permanent": true },
+    { "source": "/novedades.html", "destination": "/guias", "permanent": true }
+  ],
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        { "key": "X-Content-Type-Options", "value": "nosniff" },
+        { "key": "X-Frame-Options", "value": "DENY" },
+        { "key": "Referrer-Policy", "value": "strict-origin-when-cross-origin" },
+        { "key": "Permissions-Policy", "value": "camera=(), microphone=(), geolocation=()" },
+        { "key": "Content-Security-Policy", "value": "default-src 'self'; script-src 'self' 'unsafe-inline' https://www.googletagmanager.com; connect-src 'self' https://www.google-analytics.com https://region1.google-analytics.com; img-src 'self' data: https://www.google-analytics.com; style-src 'self'; font-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self' mailto:; upgrade-insecure-requests" }
+      ]
+    },
+    {
+      "source": "/assets/(.*)",
+      "headers": [{ "key": "Cache-Control", "value": "public, max-age=86400, stale-while-revalidate=604800" }]
+    }
+  ]
+}

@@ -1,0 +1,14 @@
+{
+  "name": "utilitools-v2",
+  "version": "2.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "node build.mjs",
+    "test": "node --test tests.mjs",
+    "check": "npm run test && npm run build && node qa.mjs"
+  },
+  "engines": {
+    "node": "24.x"
+  }
+}
