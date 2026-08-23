@@ -54,4 +54,12 @@ const sitemap = await readFile(join(root, "sitemap.xml"), "utf8");
 assert.ok((sitemap.match(/<url>/g) || []).length >= 20, "Sitemap incompleto");
 assert.ok(!sitemap.includes(".html</loc>"), "Sitemap contiene URLs heredadas duplicadas");
 
+const contact = await readFile(join(root, "contacto", "index.html"), "utf8");
+if (process.env.PUBLIC_CONTACT_EMAIL) {
+  assert.ok(contact.includes(`href="mailto:${process.env.PUBLIC_CONTACT_EMAIL}?subject=`), "Contacto no tiene el correo público esperado");
+  assert.ok(!contact.includes("Canal público en configuración"), "Contacto todavía parece incompleto");
+} else {
+  assert.ok(contact.includes("Canal público en configuración"), "El build sin correo no explica el estado del canal");
+}
+
 console.log(`QA OK: ${htmlFiles.length} HTML, ${toolFiles.length} herramientas, enlaces y metadatos verificados.`);

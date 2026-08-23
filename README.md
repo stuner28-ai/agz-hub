@@ -23,7 +23,7 @@ El resultado estático se genera en `dist/` sin dependencias externas.
 
 ## Contacto público
 
-Definí `PUBLIC_CONTACT_EMAIL` durante el build para mostrar una dirección pública en `/contacto`. Si no existe, la página explica de forma transparente que el canal todavía no fue autorizado; nunca usa el correo privado de la cuenta de despliegue.
+Definí `PUBLIC_CONTACT_EMAIL` durante el build para mostrar la dirección pública autorizada en `/contacto`. El correo no queda grabado en el repositorio.
 
 ## Publicidad
 
