@@ -11,6 +11,11 @@ const jsonLd = value => `<script type="application/ld+json">${JSON.stringify(val
 
 const pathForTool = slug => `/herramientas/${slug}`;
 const pathForGuide = slug => `/guias/${slug}`;
+const FOCUS_AREAS = [
+  { id: "ahorrar", label: "Ahorrar", icon: "↓", title: "Comprar y pagar mejor", description: "Compará promociones, tamaños y alternativas antes de gastar." },
+  { id: "emprender", label: "Emprender", icon: "↗", title: "Vender y cobrar lo justo", description: "Protegé margen, ordená costos y convertí objetivos en números." },
+  { id: "trabajar", label: "Trabajar", icon: "=", title: "Entender lo que cobrás", description: "Estimaciones laborales con fórmula, vigencia y límites visibles." }
+];
 
 const nav = current => `
   <header class="site-header">
@@ -23,10 +28,11 @@ const nav = current => `
         <span class="sr-only">Abrir menú</span><span></span><span></span><span></span>
       </button>
       <nav id="main-nav" class="main-nav" aria-label="Navegación principal">
-        <a ${current === "tools" ? 'aria-current="page"' : ""} href="/herramientas">Calculadoras</a>
+        <a href="/herramientas#ahorrar">Ahorrar</a>
+        <a href="/herramientas#emprender">Emprender</a>
+        <a href="/herramientas#trabajar">Trabajar</a>
         <a ${current === "guides" ? 'aria-current="page"' : ""} href="/guias">Guías</a>
-        <a ${current === "method" ? 'aria-current="page"' : ""} href="/metodologia">Cómo verificamos</a>
-        <a class="nav-cta" href="/herramientas/precio-de-venta">Calcular precio</a>
+        <a class="nav-cta" href="/herramientas/descuentos">Comparar una compra</a>
       </nav>
     </div>
   </header>`;
@@ -36,9 +42,9 @@ const footer = () => `
     <div class="footer-shell">
       <div class="footer-brand">
         <a class="brand brand-footer" href="/"><img src="/assets/logo.svg" width="34" height="34" alt=""><span>Utili<span>Tools</span></span></a>
-        <p>${escapeHtml(SITE.tagline)}. Herramientas independientes para decisiones cotidianas.</p>
+        <p>${escapeHtml(SITE.tagline)} El copiloto del bolsillo argentino.</p>
       </div>
-      <div class="footer-links"><strong>Explorar</strong><a href="/herramientas">Calculadoras</a><a href="/guias">Guías</a><a href="/metodologia">Metodología</a></div>
+      <div class="footer-links"><strong>Decidir</strong><a href="/herramientas#ahorrar">Ahorrar</a><a href="/herramientas#emprender">Emprender</a><a href="/herramientas#trabajar">Trabajar</a><a href="/guias">Guías</a></div>
       <div class="footer-links"><strong>Confianza</strong><a href="/equipo">Quiénes somos</a><a href="/privacidad">Privacidad</a><a href="/terminos">Términos</a><a href="/contacto">Contacto</a></div>
     </div>
     <div class="footer-bottom"><span>© 2026 UtiliTools.com.ar</span><span>Hecho en Argentina · Sin registro · Cálculos en tu dispositivo</span></div>
@@ -73,7 +79,7 @@ const head = ({ title, description, path = "/", type = "website", noindex = fals
   <meta property="og:image" content="${SITE.domain}/assets/og-default.png">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
-  <meta property="og:image:alt" content="UtiliTools, números claros para decidir mejor">
+  <meta property="og:image:alt" content="UtiliTools, decidí mejor, gastá menos y cobrá lo justo">
   <meta name="twitter:card" content="summary_large_image">
   <link rel="icon" href="/assets/icon.svg" type="image/svg+xml">
   <link rel="manifest" href="/manifest.webmanifest">
@@ -103,7 +109,7 @@ const breadcrumbData = items => ({
 const breadcrumbs = items => `<nav class="breadcrumbs" aria-label="Migas de pan">${items.map((item, index) => index === items.length - 1 ? `<span aria-current="page">${escapeHtml(item.name)}</span>` : `<a href="${item.path}">${escapeHtml(item.name)}</a><span aria-hidden="true">›</span>`).join("")}</nav>`;
 
 const toolCard = (tool, compact = false) => `
-  <a class="tool-card accent-${tool.accent} ${compact ? "tool-card-compact" : ""}" href="${pathForTool(tool.slug)}" data-search-card data-search-text="${escapeHtml(`${tool.title} ${tool.description} ${tool.category}`.toLowerCase())}">
+  <a class="tool-card accent-${tool.accent} ${compact ? "tool-card-compact" : ""}" href="${pathForTool(tool.slug)}" data-search-card data-search-text="${escapeHtml(`${tool.title} ${tool.description} ${tool.category} ${tool.focus || ""}`.toLowerCase())}">
     <span class="tool-icon" aria-hidden="true">${escapeHtml(tool.icon)}</span>
     <span class="tool-meta">${escapeHtml(tool.category)}</span>
     <h3>${escapeHtml(tool.shortTitle)}</h3>
@@ -118,31 +124,37 @@ const guideCard = guide => `
   </article>`;
 
 const renderField = field => {
+  const condition = field.showWhen ? ` data-show-when="${escapeHtml(field.showWhen)}"` : "";
   if (field.type === "select") {
-    return `<div class="field"><label for="${field.name}">${escapeHtml(field.label)}</label><select id="${field.name}" name="${field.name}">${field.options.map(([value, label]) => `<option value="${escapeHtml(value)}" ${String(value) === String(field.value) ? "selected" : ""}>${escapeHtml(label)}</option>`).join("")}</select>${field.help ? `<small>${escapeHtml(field.help)}</small>` : ""}</div>`;
+    return `<div class="field ${field.wide ? "field-wide" : ""}"${condition}><label for="${field.name}">${escapeHtml(field.label)}</label><select id="${field.name}" name="${field.name}">${field.options.map(([value, label]) => `<option value="${escapeHtml(value)}" ${String(value) === String(field.value) ? "selected" : ""}>${escapeHtml(label)}</option>`).join("")}</select>${field.help ? `<small>${escapeHtml(field.help)}</small>` : ""}</div>`;
   }
-  return `<div class="field"><label for="${field.name}">${escapeHtml(field.label)}</label><div class="input-shell">${field.prefix ? `<span>${escapeHtml(field.prefix)}</span>` : ""}<input id="${field.name}" name="${field.name}" type="number" inputmode="decimal" value="${escapeHtml(field.value)}" min="${escapeHtml(field.min)}" ${field.max !== undefined ? `max="${escapeHtml(field.max)}"` : ""} step="${escapeHtml(field.step)}" ${field.required ? "required" : ""}>${field.suffix ? `<span>${escapeHtml(field.suffix)}</span>` : ""}</div>${field.help ? `<small>${escapeHtml(field.help)}</small>` : ""}</div>`;
+  return `<div class="field"${condition}><label for="${field.name}">${escapeHtml(field.label)}</label><div class="input-shell">${field.prefix ? `<span>${escapeHtml(field.prefix)}</span>` : ""}<input id="${field.name}" name="${field.name}" type="number" inputmode="decimal" value="${escapeHtml(field.value)}" min="${escapeHtml(field.min)}" ${field.max !== undefined ? `max="${escapeHtml(field.max)}"` : ""} step="${escapeHtml(field.step)}" ${field.required ? "required" : ""}>${field.suffix ? `<span>${escapeHtml(field.suffix)}</span>` : ""}</div>${field.help ? `<small>${escapeHtml(field.help)}</small>` : ""}</div>`;
 };
 
 const trustStrip = () => `<div class="trust-strip" aria-label="Principios de UtiliTools"><span><b>✓</b> Fórmula visible</span><span><b>✓</b> Datos en tu dispositivo</span><span><b>✓</b> Fuentes enlazadas</span><span><b>✓</b> Sin registro</span></div>`;
 
 export function renderHome() {
   const websiteData = { "@context": "https://schema.org", "@type": "WebSite", name: SITE.name, url: SITE.domain, description: SITE.description, inLanguage: "es-AR" };
+  const featuredTools = ["descuentos", "precio-de-venta", "margen-ganancia", "monotributo", "aguinaldo", "punto-equilibrio"].map(slug => toolBySlug[slug]).filter(Boolean);
   const content = `
     <section class="hero">
       <div class="hero-orb hero-orb-one"></div><div class="hero-orb hero-orb-two"></div>
       <div class="hero-grid">
-        <div class="hero-copy"><span class="eyebrow">Hecho para Argentina · Actualizado</span><h1>Calculá antes de <em>decidir.</em></h1><p>Herramientas claras para poner precios, controlar márgenes, entender impuestos y hacer rendir mejor tu negocio.</p><div class="hero-actions"><a class="button primary" href="/herramientas/precio-de-venta">Calcular mi precio</a><a class="button secondary" href="/herramientas">Ver todas</a></div><div class="hero-proof"><span>${TOOLS.length} calculadoras revisadas</span><span>·</span><span>0 datos enviados</span><span>·</span><span>Fuentes oficiales</span></div></div>
-        <div class="hero-demo" aria-label="Ejemplo de resultado"><div class="demo-top"><span>Precio que sostiene tu margen</span><span class="status-dot">En vivo</span></div><div class="demo-price"><small>Precio sugerido</small><strong>$19.900</strong><span>Incluye costos + comisión + margen</span></div><div class="demo-grid"><div><small>Ganancia</small><b>$5.970</b></div><div><small>Margen</small><b>30,0%</b></div></div><a href="/herramientas/precio-de-venta">Usar con mis números <span>→</span></a></div>
+        <div class="hero-copy"><span class="eyebrow">El copiloto del bolsillo argentino</span><h1>Antes de pagar, <em>compará.</em></h1><p>Herramientas para comprar, pagar, cobrar y vender con una recomendación clara. Sin registro, sin entregar tus números y con fórmulas que podés revisar.</p><div class="hero-actions"><a class="button primary" href="/herramientas/descuentos">Comparar una oferta</a><a class="button secondary" href="#elegi-tu-objetivo">Elegir mi objetivo</a></div><div class="hero-proof"><span>${TOOLS.length} herramientas verificadas</span><span>·</span><span>Datos en tu dispositivo</span><span>·</span><span>Hecho para Argentina</span></div></div>
+        <div class="hero-demo" aria-label="Ejemplo de una comparación de compra"><div class="demo-top"><span>Compra inteligente</span><span class="status-dot">Resultado claro</span></div><div class="demo-price"><small>Mejor relación precio-cantidad</small><strong>Opción A</strong><span>Ahorra 21,7% al comparar cada 100 g</span></div><div class="demo-grid"><div><small>Opción A · 2x1</small><b>$320 / 100 g</b></div><div><small>Opción B · 3x2</small><b>$408,89 / 100 g</b></div></div><a href="/herramientas/descuentos">Comparar mis opciones <span>→</span></a></div>
       </div>
     </section>
     ${trustStrip()}
-    <section class="section shell" aria-labelledby="tools-title">
-      <div class="section-heading"><div><span class="eyebrow dark">Empezá por una decisión</span><h2 id="tools-title">Las cuentas que más cuestan, resueltas</h2></div><a class="text-link" href="/herramientas">Explorar las ${TOOLS.length} <span>→</span></a></div>
-      <div class="quick-search"><label for="tool-search">¿Qué necesitás calcular?</label><div><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.3-4.3"></path></svg><input id="tool-search" type="search" placeholder="Ej.: precio, monotributo, aguinaldo…" autocomplete="off"></div><p data-search-empty hidden>No encontramos una herramienta con esas palabras.</p></div>
-      <div class="tool-grid" data-search-grid>${TOOLS.slice(0, 6).map(tool => toolCard(tool)).join("")}</div>
+    <section class="section shell" id="elegi-tu-objetivo" aria-labelledby="focus-title">
+      <div class="section-heading"><div><span class="eyebrow dark">Empezá por lo que necesitás resolver</span><h2 id="focus-title">¿Qué querés decidir hoy?</h2></div><a class="text-link" href="/herramientas">Ver todas las herramientas <span>→</span></a></div>
+      <div class="focus-grid">${FOCUS_AREAS.map(area => `<a class="focus-card focus-${area.id}" href="/herramientas#${area.id}"><span class="focus-icon" aria-hidden="true">${area.icon}</span><small>${area.label}</small><h3>${area.title}</h3><p>${area.description}</p><b>Empezar <span aria-hidden="true">→</span></b></a>`).join("")}</div>
     </section>
-    <section class="impact-section"><div class="shell impact-grid"><div><span class="eyebrow">Una diferencia concreta</span><h2>No te damos solo un número.<br>Te mostramos de dónde sale.</h2><p>Cada calculadora publica su fórmula, un ejemplo, sus límites y la fuente cuando depende de reglas oficiales.</p><a class="button secondary light" href="/metodologia">Ver cómo verificamos</a></div><div class="impact-list"><article><span>01</span><div><h3>Corregible</h3><p>Cada página muestra fecha de revisión y un canal para reportar errores.</p></div></article><article><span>02</span><div><h3>Privado</h3><p>Tus importes se calculan en el navegador y quedan guardados solo en tu dispositivo.</p></div></article><article><span>03</span><div><h3>Compartible</h3><p>Copiá o compartí el resultado sin exponer los valores que no quieras mostrar.</p></div></article></div></div></section>
+    <section class="section shell no-top" aria-labelledby="tools-title">
+      <div class="section-heading"><div><span class="eyebrow dark">Decisiones frecuentes</span><h2 id="tools-title">Una respuesta útil, no solo un número</h2></div><a class="text-link" href="/herramientas">Explorar las ${TOOLS.length} <span>→</span></a></div>
+      <div class="quick-search"><label for="tool-search">¿Qué necesitás resolver?</label><div><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.3-4.3"></path></svg><input id="tool-search" type="search" placeholder="Ej.: comparar 2x1, poner precio, aguinaldo…" autocomplete="off"></div><p data-search-empty hidden>No encontramos una herramienta con esas palabras.</p></div>
+      <div class="tool-grid" data-search-grid>${featuredTools.map(tool => toolCard(tool)).join("")}</div>
+    </section>
+    <section class="impact-section"><div class="shell impact-grid"><div><span class="eyebrow">Diseñado para volver</span><h2>De una duda concreta a una decisión defendible.</h2><p>Cada herramienta termina con una recomendación, conecta con el siguiente paso y explica fórmula, límites y fuentes.</p><a class="button secondary light" href="/metodologia">Ver cómo verificamos</a></div><div class="impact-list"><article><span>01</span><div><h3>Accionable</h3><p>Te decimos qué opción conviene o qué dato necesita atención, no solo mostramos una cifra.</p></div></article><article><span>02</span><div><h3>Privado</h3><p>Tus importes se calculan y se recuerdan únicamente en tu dispositivo.</p></div></article><article><span>03</span><div><h3>Compartible</h3><p>Mandá la conclusión por WhatsApp o copiá el resultado para decidir con otra persona.</p></div></article></div></div></section>
     <section class="section shell" aria-labelledby="guides-title"><div class="section-heading"><div><span class="eyebrow dark">Entender para decidir</span><h2 id="guides-title">Guías que completan la cuenta</h2></div><a class="text-link" href="/guias">Ver guías <span>→</span></a></div><div class="guide-grid">${GUIDES.map(guideCard).join("")}</div></section>
     <section class="return-panel shell"><div><span class="eyebrow dark">Tu espacio, sin crear cuenta</span><h2>Guardá herramientas y recuperá tus últimos valores.</h2><p>UtiliTools usa almacenamiento local: permanece en este dispositivo y podés borrarlo cuando quieras.</p></div><div class="saved-tools" data-saved-tools><p>Todavía no guardaste calculadoras.</p></div></section>`;
   return layout({ title: SITE.name, description: SITE.description, path: "/", current: "home", content, structured: [websiteData] });
@@ -150,8 +162,12 @@ export function renderHome() {
 
 export function renderToolsIndex() {
   const items = [{ name: "Inicio", path: "/" }, { name: "Calculadoras", path: "/herramientas" }];
-  const content = `<section class="page-hero shell">${breadcrumbs(items)}<span class="eyebrow dark">${TOOLS.length} herramientas verificadas</span><h1>Calculadoras para decisiones reales</h1><p>Menos páginas, más profundidad. Elegí una herramienta y encontrá fórmula, explicación, ejemplo, fuentes y límites.</p></section><section class="section shell no-top"><div class="quick-search"><label for="tool-search">Buscar calculadora</label><div><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.3-4.3"></path></svg><input id="tool-search" type="search" placeholder="Precio, IVA, impresión 3D…"></div><p data-search-empty hidden>No encontramos una herramienta con esas palabras.</p></div><div class="tool-grid" data-search-grid>${TOOLS.map(tool => toolCard(tool)).join("")}</div></section>`;
-  return layout({ title: "Calculadoras", description: "Calculadoras verificadas de negocio, impuestos, trabajo, marketing y producción.", path: "/herramientas", current: "tools", content, structured: [breadcrumbData(items)] });
+  const focusSections = FOCUS_AREAS.map(area => {
+    const tools = TOOLS.filter(tool => tool.focus === area.id);
+    return `<section class="focus-section" id="${area.id}" data-focus-group><header><span class="focus-icon" aria-hidden="true">${area.icon}</span><div><small>${area.label}</small><h2>${area.title}</h2><p>${area.description}</p></div></header><div class="tool-grid">${tools.map(tool => toolCard(tool)).join("")}</div></section>`;
+  }).join("");
+  const content = `<section class="page-hero shell">${breadcrumbs(items)}<span class="eyebrow dark">El copiloto del bolsillo argentino</span><h1>Comprar, pagar, cobrar y vender con números claros</h1><p>Elegí una decisión. Cada herramienta combina cálculo, recomendación, ejemplo, fuentes y límites para que no tengas que completar la respuesta en otra página.</p></section><section class="section shell no-top"><div class="quick-search"><label for="tool-search">Buscar una decisión o herramienta</label><div><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.3-4.3"></path></svg><input id="tool-search" type="search" placeholder="2x1, precio, margen, monotributo, aguinaldo…"></div><p data-search-empty hidden>No encontramos una herramienta con esas palabras.</p></div><div class="focus-sections" data-search-grid>${focusSections}</div></section>`;
+  return layout({ title: "Herramientas para decidir", description: "Herramientas verificadas para ahorrar, emprender y entender lo que cobrás en Argentina.", path: "/herramientas", current: "tools", content, structured: [breadcrumbData(items)] });
 }
 
 export function renderToolPage(tool) {
@@ -179,8 +195,8 @@ export function renderToolPage(tool) {
 
 export function renderGuidesIndex() {
   const items = [{ name: "Inicio", path: "/" }, { name: "Guías", path: "/guias" }];
-  const content = `<section class="page-hero shell">${breadcrumbs(items)}<span class="eyebrow dark">Guías originales</span><h1>La explicación detrás del número</h1><p>Material práctico para tomar decisiones, con ejemplos propios, checklist y acceso directo a la calculadora correspondiente.</p></section><section class="section shell no-top"><div class="guide-grid guide-grid-index">${GUIDES.map(guideCard).join("")}</div></section>`;
-  return layout({ title: "Guías", description: "Guías prácticas de precios, margen y Monotributo para Argentina.", path: "/guias", current: "guides", content, structured: [breadcrumbData(items)] });
+  const content = `<section class="page-hero shell">${breadcrumbs(items)}<span class="eyebrow dark">Guías originales</span><h1>Entender para decidir mejor</h1><p>Casos argentinos, ejemplos propios y listas de control para comprar, cobrar o vender sin que una cuenta incompleta te haga perder dinero.</p></section><section class="section shell no-top"><div class="guide-grid guide-grid-index">${GUIDES.map(guideCard).join("")}</div></section>`;
+  return layout({ title: "Guías para decidir mejor", description: "Guías prácticas de ahorro, precios, margen, trabajo y Monotributo para Argentina.", path: "/guias", current: "guides", content, structured: [breadcrumbData(items)] });
 }
 
 export function renderGuidePage(guide) {
@@ -202,7 +218,7 @@ export function renderMethodology() {
 export function renderAbout() {
   const path = "/equipo";
   const items = [{ name: "Inicio", path: "/" }, { name: "Quiénes somos", path }];
-  const content = `<section class="page-hero shell narrow">${breadcrumbs(items)}<span class="eyebrow dark">Proyecto independiente argentino</span><h1>UtiliTools existe para que una cuenta difícil no frene una decisión.</h1><p>Somos un proyecto editorial y tecnológico enfocado en herramientas prácticas para trabajadores, monotributistas y pequeños negocios.</p></section><article class="policy-page shell"><section><h2>Qué hacemos</h2><p>Diseñamos calculadoras que combinan una interfaz rápida con explicación suficiente para entender el resultado. Priorizamos problemas frecuentes en Argentina: precios, márgenes, obligaciones básicas, campañas y producción.</p></section><section><h2>Qué no hacemos</h2><p>No vendemos datos personales, no pedimos credenciales fiscales y no prometemos resultados financieros. Tampoco publicamos decenas de páginas automáticas sobre temas que no podemos mantener.</p></section><section><h2>Responsabilidad editorial</h2><p>El Equipo UtiliTools investiga, implementa y revisa el contenido. En temas regulados, la fuente oficial y el profesional que conoce tu situación prevalecen sobre una estimación general.</p></section><section><h2>Modelo de sostenimiento</h2><p>El acceso es gratuito. El proyecto busca financiarse con publicidad claramente identificada y compatible con la lectura. Mientras AdSense revisa el sitio, no mostramos espacios vacíos ni anuncios simulados. La utilidad del contenido es el centro de cada página.</p></section></article>`;
+  const content = `<section class="page-hero shell narrow">${breadcrumbs(items)}<span class="eyebrow dark">Proyecto independiente argentino</span><h1>UtiliTools es el copiloto de una decisión con dinero.</h1><p>Antes de comprar, pagar, cobrar o vender, transformamos precios y reglas confusas en una recomendación que se puede entender y revisar.</p></section><article class="policy-page shell"><section><h2>Nuestro foco</h2><p>Diseñamos herramientas para tres momentos conectados: ahorrar en decisiones cotidianas, sostener un emprendimiento y entender lo que una persona cobra. Priorizamos problemas argentinos frecuentes y evitamos mezclar temas que no podemos mantener con profundidad.</p></section><section><h2>Qué hace diferente a una herramienta</h2><p>No alcanza con devolver un número. Cada página debe mostrar qué opción conviene o qué dato merece atención, explicar la fórmula, incluir un ejemplo propio, declarar límites, enlazar fuentes y ofrecer un siguiente paso útil.</p></section><section><h2>Qué no hacemos</h2><p>No vendemos datos personales, no pedimos credenciales fiscales y no prometemos ahorros, ingresos ni resultados financieros. Tampoco publicamos decenas de páginas automáticas sobre salud, tendencias u otros temas ajenos al propósito del sitio.</p></section><section><h2>Responsabilidad editorial</h2><p>El Equipo UtiliTools investiga, implementa, prueba y revisa el contenido. En temas regulados, la fuente oficial y el profesional que conoce tu situación prevalecen sobre una estimación general.</p></section><section><h2>Modelo de sostenimiento</h2><p>El acceso es gratuito. El proyecto busca financiarse con publicidad claramente identificada y compatible con la lectura. Mientras AdSense revisa el sitio, no mostramos espacios vacíos ni anuncios simulados. La utilidad del producto está antes que la publicidad.</p></section></article>`;
   return layout({ title: "Quiénes somos", description: "Conocé el propósito, alcance y responsabilidad editorial de UtiliTools.", path, current: "about", content, structured: [breadcrumbData(items)] });
 }
 

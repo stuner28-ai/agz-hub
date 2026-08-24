@@ -162,6 +162,80 @@ export function calculateDiscounts(input) {
   };
 }
 
+const PROMOTIONS = new Set(["none", "two-for-one", "three-for-two", "percent", "second-unit"]);
+
+function promotionProfile(type, discountValue, optionLabel) {
+  const promotion = PROMOTIONS.has(type) ? type : "none";
+  const discountPct = percentage(discountValue || 0, `el descuento de la opción ${optionLabel}`, 100);
+  if ((promotion === "percent" || promotion === "second-unit") && discountPct <= 0) {
+    throw new Error(`Ingresá el porcentaje de descuento de la opción ${optionLabel}.`);
+  }
+  if (promotion === "two-for-one") return { received: 2, paidFactor: 1, effectiveDiscountPct: 50 };
+  if (promotion === "three-for-two") return { received: 3, paidFactor: 2, effectiveDiscountPct: 100 / 3 };
+  if (promotion === "percent") return { received: 1, paidFactor: 1 - discountPct / 100, effectiveDiscountPct: discountPct };
+  if (promotion === "second-unit") return { received: 2, paidFactor: 2 - discountPct / 100, effectiveDiscountPct: discountPct / 2 };
+  return { received: 1, paidFactor: 1, effectiveDiscountPct: 0 };
+}
+
+function smartBuyOption({ price, content, promotion, discountPct, referenceAmount, optionLabel }) {
+  const profile = promotionProfile(promotion, discountPct, optionLabel);
+  const bundleListPrice = price * profile.received;
+  const bundlePrice = price * profile.paidFactor;
+  const totalContent = content * profile.received;
+  return {
+    price,
+    content,
+    received: profile.received,
+    bundlePrice,
+    totalContent,
+    averagePackPrice: bundlePrice / profile.received,
+    referencePrice: (bundlePrice / totalContent) * referenceAmount,
+    saved: bundleListPrice - bundlePrice,
+    effectiveDiscountPct: profile.effectiveDiscountPct
+  };
+}
+
+export function calculateSmartBuy(input) {
+  const priceA = nonNegative(input.priceA, "el precio de la opción A");
+  const contentA = nonNegative(input.contentA, "el contenido de la opción A");
+  const priceB = nonNegative(input.priceB, "el precio de la opción B");
+  const contentB = nonNegative(input.contentB, "el contenido de la opción B");
+  if (priceA <= 0 || contentA <= 0 || priceB <= 0 || contentB <= 0) {
+    throw new Error("Precios y contenidos de ambas opciones deben ser mayores que cero.");
+  }
+
+  const unitKind = ["g", "ml", "kg", "l", "unit"].includes(input.unitKind) ? input.unitKind : "unit";
+  const referenceAmount = unitKind === "g" || unitKind === "ml" ? 100 : 1;
+  const referenceLabel = unitKind === "g"
+    ? "cada 100 g"
+    : unitKind === "ml"
+      ? "cada 100 ml"
+      : unitKind === "kg"
+        ? "por kg"
+        : unitKind === "l"
+          ? "por litro"
+          : "por unidad";
+
+  const optionA = smartBuyOption({ price: priceA, content: contentA, promotion: input.promoA, discountPct: input.discountA, referenceAmount, optionLabel: "A" });
+  const optionB = smartBuyOption({ price: priceB, content: contentB, promotion: input.promoB, discountPct: input.discountB, referenceAmount, optionLabel: "B" });
+  const difference = Math.abs(optionA.referencePrice - optionB.referencePrice);
+  const comparisonBase = Math.max(optionA.referencePrice, optionB.referencePrice);
+  const savingsPct = comparisonBase ? (difference / comparisonBase) * 100 : 0;
+  const epsilon = 0.005;
+  const winner = difference < epsilon ? "tie" : optionA.referencePrice < optionB.referencePrice ? "A" : "B";
+
+  return {
+    optionA,
+    optionB,
+    winner,
+    difference,
+    savingsPct,
+    referenceAmount,
+    referenceLabel,
+    unitKind
+  };
+}
+
 export function calculateCompoundInterest(input) {
   const initial = nonNegative(input.initial, "el capital inicial");
   const monthly = nonNegative(input.monthly, "el aporte mensual");

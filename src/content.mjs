@@ -1,12 +1,12 @@
 export const SITE = {
   name: "UtiliTools",
   domain: "https://www.utilitools.com.ar",
-  tagline: "Números claros para decidir mejor",
-  description: "Calculadoras verificadas para trabajadores, monotributistas y pequeños negocios de Argentina.",
+  tagline: "Decidí mejor. Gastá menos. Cobrá lo justo.",
+  description: "El copiloto del bolsillo argentino: herramientas verificadas para comprar, pagar, cobrar y vender con números claros.",
   analyticsId: "G-2RK3H8JB0P",
   adsensePublisher: "pub-2453279126589038",
-  updatedHuman: "23 de agosto de 2026",
-  updatedIso: "2026-08-23"
+  updatedHuman: "24 de agosto de 2026",
+  updatedIso: "2026-08-24"
 };
 
 const numberField = (name, label, value, options = {}) => ({
@@ -20,16 +20,18 @@ const numberField = (name, label, value, options = {}) => ({
   prefix: options.prefix,
   suffix: options.suffix,
   help: options.help,
+  showWhen: options.showWhen,
   required: options.required ?? true
 });
 
-const selectField = (name, label, value, options, help) => ({
+const selectField = (name, label, value, options, help, wide = false) => ({
   type: "select",
   name,
   label,
   value,
   options,
   help,
+  wide,
   required: true
 });
 
@@ -37,6 +39,7 @@ export const TOOLS = [
   {
     slug: "precio-de-venta",
     calculator: "sale-price",
+    focus: "emprender",
     category: "Negocio",
     icon: "↗",
     accent: "lime",
@@ -98,6 +101,7 @@ export const TOOLS = [
   {
     slug: "monotributo",
     calculator: "monotributo",
+    focus: "emprender",
     category: "Argentina",
     icon: "AR",
     accent: "sky",
@@ -156,6 +160,7 @@ export const TOOLS = [
   {
     slug: "margen-ganancia",
     calculator: "margin",
+    focus: "emprender",
     category: "Negocio",
     icon: "%",
     accent: "violet",
@@ -188,6 +193,7 @@ export const TOOLS = [
   {
     slug: "iva",
     calculator: "vat",
+    focus: "emprender",
     category: "Argentina",
     icon: "+",
     accent: "amber",
@@ -219,6 +225,7 @@ export const TOOLS = [
   {
     slug: "aguinaldo",
     calculator: "aguinaldo",
+    focus: "trabajar",
     category: "Trabajo",
     icon: "½",
     accent: "rose",
@@ -249,6 +256,7 @@ export const TOOLS = [
   {
     slug: "punto-equilibrio",
     calculator: "break-even",
+    focus: "emprender",
     category: "Negocio",
     icon: "=",
     accent: "teal",
@@ -281,6 +289,7 @@ export const TOOLS = [
   {
     slug: "roi-roas",
     calculator: "roi",
+    focus: "emprender",
     category: "Marketing",
     icon: "◎",
     accent: "blue",
@@ -312,38 +321,53 @@ export const TOOLS = [
   },
   {
     slug: "descuentos",
-    calculator: "discounts",
-    category: "Negocio",
-    icon: "↓",
+    calculator: "smart-buy",
+    focus: "ahorrar",
+    category: "Ahorrar",
+    icon: "✓",
     accent: "orange",
-    title: "Calculadora de descuentos sucesivos",
-    shortTitle: "Descuentos",
-    description: "Calculá precio final, ahorro efectivo y cuánto habría que aumentar después para volver al precio original.",
-    promise: "Dos descuentos, un porcentaje real y cero errores de suma.",
+    title: "Comparador de ofertas: 2x1, 3x2 y precio por unidad",
+    shortTitle: "Compra inteligente",
+    description: "Compará dos productos aunque tengan tamaños y promociones diferentes. Descubrí cuál cuesta menos por unidad y cuánto ahorrás realmente.",
+    promise: "La oferta ganadora, explicada en pesos y por unidad comparable.",
     fields: [
-      numberField("originalPrice", "Precio original", 50000, { prefix: "$" }),
-      numberField("firstPct", "Primer descuento", 20, { suffix: "%", max: 100 }),
-      numberField("secondPct", "Segundo descuento", 10, { suffix: "%", max: 100, required: false })
+      selectField("unitKind", "Unidad para comparar", "g", [["g", "Gramos (resultado cada 100 g)"], ["ml", "Mililitros (resultado cada 100 ml)"], ["kg", "Kilogramos (resultado por kg)"], ["l", "Litros (resultado por litro)"], ["unit", "Unidades (resultado por unidad)"]], "Usá la misma unidad para el contenido de ambas opciones.", true),
+      numberField("priceA", "Precio de lista por envase A", 3200, { prefix: "$" }),
+      numberField("priceB", "Precio de lista por envase B", 4600, { prefix: "$" }),
+      numberField("contentA", "Contenido de cada envase A", 500, { help: "Ej.: 500 si elegiste gramos; 1,5 si elegiste litros." }),
+      numberField("contentB", "Contenido de cada envase B", 750, { help: "Debe estar expresado en la misma unidad que la opción A." }),
+      selectField("promoA", "Opción A · promoción", "two-for-one", [["none", "Sin promoción"], ["two-for-one", "2x1"], ["three-for-two", "3x2"], ["percent", "Descuento general"], ["second-unit", "Descuento en la segunda unidad"]]),
+      selectField("promoB", "Opción B · promoción", "three-for-two", [["none", "Sin promoción"], ["two-for-one", "2x1"], ["three-for-two", "3x2"], ["percent", "Descuento general"], ["second-unit", "Descuento en la segunda unidad"]]),
+      numberField("discountA", "Porcentaje de descuento A", 0, { suffix: "%", max: 100, required: false, help: "Se aplica según la promoción seleccionada.", showWhen: "promoA:percent,second-unit" }),
+      numberField("discountB", "Porcentaje de descuento B", 0, { suffix: "%", max: 100, required: false, help: "Se aplica según la promoción seleccionada.", showWhen: "promoB:percent,second-unit" })
     ],
-    formula: "Precio final = precio original × (1 − descuento 1) × (1 − descuento 2)",
-    formulaNote: "Los descuentos sucesivos se aplican sobre bases distintas. 20% y luego 10% equivalen a 28%, no a 30%.",
-    exampleTitle: "La promoción 20% + 10%",
-    example: "Sobre $50.000, el primer descuento deja $40.000 y el segundo descuenta $4.000. El precio final es $36.000: el ahorro efectivo es 28%.",
+    formula: "Precio comparable = desembolso de la promoción ÷ contenido total recibido × unidad de referencia",
+    formulaNote: "Un 2x1 equivale a pagar un envase y recibir dos; un 3x2, a pagar dos y recibir tres. La herramienta normaliza ambas compras a 100 g, 100 ml, un kilogramo, un litro o una unidad.",
+    exampleTitle: "Un envase más barato puede terminar costando más",
+    example: "Opción A: paquete de 500 g a $3.200 en 2x1. Opción B: paquete de 750 g a $4.600 en 3x2. La primera exige $3.200 y entrega 1.000 g, equivalentes a $320 cada 100 g. La segunda exige $9.200 y entrega 2.250 g, o $408,89 cada 100 g. Aun con un envase individual más grande, la opción B cuesta aproximadamente 27,8% más por la misma cantidad.",
     sections: [
-      { title: "Descuento y recuperación no son simétricos", paragraphs: ["Después de bajar 20%, necesitás subir 25% sobre el precio rebajado para volver al original. Cuanto mayor es la baja, mayor es el aumento de recuperación.", "Esta métrica es útil para promociones: permite saber cuánto margen comprometés y qué precio quedará como referencia para el cliente."] },
-      { title: "Controlar promociones con margen", paragraphs: ["Antes de lanzar una oferta, calculá el costo total por unidad. El ahorro para el cliente no debería ocultar una pérdida para el negocio. Si el descuento se financia con presupuesto publicitario o del proveedor, registralo por separado."] }
+      { title: "Compará cantidades equivalentes", paragraphs: ["El precio grande del cartel no alcanza para decidir. Dos paquetes pueden tener distinto peso, volumen o cantidad de unidades; además, cada promoción obliga a llevar una cantidad diferente. Convertir todo a una misma referencia elimina el efecto visual del envase y permite comparar lo que realmente recibís por cada peso.", "En gramos y mililitros mostramos el resultado cada 100 para que sea legible. En kilogramos, litros y unidades usamos una unidad completa. Cargá el contenido neto declarado en el envase, no su tamaño exterior ni una estimación visual."] },
+      { title: "Cómo interpreta cada promoción", paragraphs: ["En un 2x1 pagás un envase y recibís dos, por lo que el descuento efectivo del conjunto es 50%. En un 3x2 pagás dos de tres: el ahorro efectivo es 33,33%. Un descuento general se aplica a todo el precio y una promoción de segunda unidad aplica el porcentaje únicamente sobre el segundo envase.", "Si la segunda unidad tiene 70% de descuento, el conjunto cuesta 130% de un envase: uno completo más 30% del segundo. No es lo mismo que 70% sobre toda la compra. La calculadora realiza esa separación y muestra tanto el desembolso total como el precio comparable."] },
+      { title: "La mejor relación no siempre es la mejor compra", paragraphs: ["El menor precio por unidad indica eficiencia económica, pero no obliga a comprar. Una promoción puede exigir gastar más dinero, ocupar espacio o llevar una cantidad que vence antes de consumirse. Si parte del producto termina desperdiciada, el ahorro matemático desaparece.", "Revisá fecha de vencimiento, calidad, condiciones de conservación y límite por cliente. También confirmá que ambos productos sean sustitutos reales: comparar detergentes con concentraciones muy distintas o rollos con diferente metraje puede requerir otra unidad funcional."] },
+      { title: "Usala en la góndola o antes de comprar online", paragraphs: ["Guardá la herramienta en el celular y reemplazá los valores con los precios visibles. No necesita cuenta y los importes quedan en el dispositivo. Si el comercio modifica una oferta, recalculás sin depender de una tabla desactualizada.", "La normativa argentina contempla la exhibición del precio por unidad de medida para facilitar comparaciones. Esta herramienta complementa esa información cuando hay promociones, tamaños distintos o carteles difíciles de interpretar; no verifica el precio cobrado ni reemplaza un reclamo de consumo."] }
     ],
     faqs: [
-      ["¿Puedo sumar dos descuentos?", "No si se aplican uno después del otro. Cada porcentaje usa como base el precio ya rebajado."],
-      ["¿Qué significa aumento de recuperación?", "Es el porcentaje que debería subir el precio final para regresar al precio original."],
-      ["¿Admite un solo descuento?", "Sí. Dejá el segundo en cero."]
+      ["¿Un 3x2 equivale a 33% de descuento?", "Equivale a 33,33% sobre el conjunto de tres unidades, porque pagás dos y recibís tres."],
+      ["¿Cómo cargo una segunda unidad al 70%?", "Elegí “Descuento en la segunda unidad” e ingresá 70. El primer envase se paga completo y el segundo al 30% de su precio."],
+      ["¿Qué pasa si los envases tienen tamaños diferentes?", "Cargá el contenido de cada uno en la misma unidad. La herramienta los normaliza antes de compararlos."],
+      ["¿Debo elegir la opción con menor precio por unidad?", "No necesariamente. Considerá desembolso, cantidad que realmente usarás, vencimiento, calidad y almacenamiento."],
+      ["¿La calculadora toma reintegros bancarios?", "Todavía no. Usá el precio efectivamente pagado después del reintegro o esperá el módulo específico de cuotas y promociones bancarias."]
     ],
-    sources: [["Metodología UtiliTools", "/metodologia", "Composición porcentual reproducible."]],
-    related: ["margen-ganancia", "precio-de-venta", "roi-roas"]
+    sources: [
+      ["Resolución 4/2025 — exhibición de precios", "https://www.argentina.gob.ar/normativa/nacional/resoluci%C3%B3n-4-2025-408455/texto", "Define el precio por unidad de medida para facilitar la comparación."],
+      ["Metodología UtiliTools", "/metodologia", "Normalización de promociones y precios unitarios con casos de prueba públicos."]
+    ],
+    related: ["interes-compuesto", "margen-ganancia", "precio-de-venta"]
   },
   {
     slug: "interes-compuesto",
     calculator: "compound-interest",
+    focus: "ahorrar",
     category: "Finanzas",
     icon: "∿",
     accent: "indigo",
@@ -377,6 +401,7 @@ export const TOOLS = [
   {
     slug: "costo-impresion-3d",
     calculator: "3d-print",
+    focus: "emprender",
     category: "Producción",
     icon: "3D",
     accent: "fuchsia",
@@ -419,6 +444,22 @@ export const TOOLS = [
 ];
 
 export const GUIDES = [
+  {
+    slug: "como-comparar-ofertas-2x1-3x2",
+    title: "2x1, 3x2 o segunda unidad: cómo saber qué oferta conviene",
+    description: "Un método rápido para comparar promociones, tamaños de envase y precio por unidad sin dejarse llevar por el cartel.",
+    category: "Ahorro cotidiano",
+    readingTime: "7 min",
+    tool: "descuentos",
+    intro: "Una promoción puede ser real y aun así no ser la mejor compra. El problema aparece cuando comparamos el porcentaje del cartel en lugar del costo de obtener la misma cantidad de producto.",
+    sections: [
+      ["1. Traducí la promoción a unidades pagadas y recibidas", ["En un 2x1 recibís dos unidades y pagás una. Si cada una vale $3.000, el desembolso es $3.000 por dos: $1.500 de promedio. En un 3x2 pagás $6.000 y recibís tres: $2.000 de promedio. Esa primera traducción evita pensar que ambas promociones ofrecen un ahorro parecido.", "La segunda unidad con descuento necesita un paso adicional. Si el segundo producto tiene 70% de descuento, se paga 30% de su precio: el conjunto cuesta 1,3 veces el valor individual. El ahorro efectivo sobre dos unidades es 35%, no 70%."]],
+      ["2. Convertí los envases a una misma medida", ["El promedio por envase solo sirve cuando las presentaciones son iguales. Para comparar 500 g contra 750 g, dividí el costo total por los gramos recibidos y multiplicá por 100. El mismo criterio se aplica a mililitros, litros, metros o unidades físicas.", "La Resolución 4/2025 contempla la exhibición del precio por unidad de medida en Argentina. Aun así, una promoción puede cambiar el costo final del conjunto; por eso conviene recalcular usando el desembolso real después del beneficio."]],
+      ["3. Separá ahorro porcentual de dinero desembolsado", ["La alternativa de menor precio por unidad puede exigir más efectivo en el momento. Un 3x2 de envases grandes quizá sea eficiente, pero obliga a pagar dos unidades. Mirá ambos datos: costo comparable y desembolso total de la promoción.", "También preguntate cuánto vas a usar. Si el producto vence, pierde calidad o ocupa un espacio que no tenés, comprar de más puede transformar un descuento en desperdicio. La herramienta ordena la matemática; la decisión final incluye consumo y almacenamiento."]],
+      ["4. Verificá que la comparación sea justa", ["Dos productos similares no siempre rinden igual. Detergentes concentrados, rollos con distinto metraje, cápsulas con dosis diferentes o alimentos con peso escurrido requieren comparar la unidad funcional adecuada. Usá la cantidad que representa el uso real cuando la etiqueta la informa.", "Antes de pagar, revisá vigencia, medio de pago, tope, límite por cliente y precio anterior. Conservá una captura si comprás online. Si el precio de caja no coincide con el exhibido, la calculadora no reemplaza los canales formales de reclamo."]]
+    ],
+    checklist: ["Precio individual de cada opción", "Contenido neto del envase", "Unidades pagadas", "Unidades recibidas", "Descuento solo sobre la segunda unidad", "Desembolso total", "Precio cada 100 g/ml o por unidad", "Vencimiento y cantidad que realmente usarás"]
+  },
   {
     slug: "como-calcular-precio-de-venta",
     title: "Cómo calcular un precio de venta sin comerte el margen",

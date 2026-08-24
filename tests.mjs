@@ -8,6 +8,7 @@ import {
   calculateBreakEven,
   calculateRoi,
   calculateDiscounts,
+  calculateSmartBuy,
   calculateCompoundInterest,
   calculate3dPrint,
   calculateMonotributo,
@@ -64,6 +65,27 @@ test("descuentos sucesivos 20% y 10% equivalen a 28%", () => {
   const result = calculateDiscounts({ originalPrice: 50000, firstPct: 20, secondPct: 10 });
   assert.equal(result.finalPrice, 36000);
   closeTo(result.effectiveDiscountPct, 28);
+});
+
+test("compra inteligente compara 2x1 y 3x2 por la misma cantidad", () => {
+  const result = calculateSmartBuy({ unitKind: "g", priceA: 3200, contentA: 500, promoA: "two-for-one", discountA: 0, priceB: 4600, contentB: 750, promoB: "three-for-two", discountB: 0 });
+  assert.equal(result.winner, "A");
+  closeTo(result.optionA.referencePrice, 320);
+  closeTo(result.optionB.referencePrice, 408.888888, 0.001);
+  closeTo(result.optionA.effectiveDiscountPct, 50);
+  closeTo(result.optionB.effectiveDiscountPct, 33.333333, 0.001);
+});
+
+test("compra inteligente aplica el descuento solo a la segunda unidad", () => {
+  const result = calculateSmartBuy({ unitKind: "unit", priceA: 100, contentA: 1, promoA: "second-unit", discountA: 70, priceB: 70, contentB: 1, promoB: "none", discountB: 0 });
+  assert.equal(result.winner, "A");
+  closeTo(result.optionA.bundlePrice, 130);
+  closeTo(result.optionA.referencePrice, 65);
+  closeTo(result.optionA.effectiveDiscountPct, 35);
+});
+
+test("compra inteligente exige el porcentaje en promociones configurables", () => {
+  assert.throws(() => calculateSmartBuy({ unitKind: "unit", priceA: 100, contentA: 1, promoA: "percent", discountA: 0, priceB: 100, contentB: 1, promoB: "none", discountB: 0 }), /porcentaje de descuento de la opción A/);
 });
 
 test("interés compuesto con tasa cero conserva aportes", () => {

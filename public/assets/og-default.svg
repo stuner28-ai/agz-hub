@@ -5,8 +5,9 @@
   <circle cx="120" cy="620" r="280" fill="#c9ff4a" opacity=".12" filter="url(#b)"/>
   <g transform="translate(80 70)"><rect width="72" height="72" rx="20" fill="#c9ff4a"/><path d="M20 20v20c0 9 5 14 16 14s16-5 16-14V20h-9v20c0 4-2 6-7 6s-7-2-7-6V20z" fill="#09111f"/></g>
   <text x="170" y="118" font-family="Arial,Helvetica,sans-serif" font-size="38" font-weight="800" fill="#ffffff">Utili<tspan fill="#c9ff4a">Tools</tspan></text>
-  <text x="80" y="290" font-family="Arial,Helvetica,sans-serif" font-size="82" font-weight="800" fill="#ffffff">Números claros.</text>
-  <text x="80" y="385" font-family="Arial,Helvetica,sans-serif" font-size="82" font-weight="800" fill="#c9ff4a">Decisiones mejores.</text>
-  <text x="84" y="462" font-family="Arial,Helvetica,sans-serif" font-size="26" fill="#b6c4d7">Calculadoras verificadas para Argentina.</text>
+  <text x="80" y="270" font-family="Arial,Helvetica,sans-serif" font-size="76" font-weight="800" fill="#ffffff">Decidí mejor.</text>
+  <text x="80" y="356" font-family="Arial,Helvetica,sans-serif" font-size="76" font-weight="800" fill="#c9ff4a">Gastá menos.</text>
+  <text x="80" y="442" font-family="Arial,Helvetica,sans-serif" font-size="76" font-weight="800" fill="#ffffff">Cobrá lo justo.</text>
+  <text x="84" y="500" font-family="Arial,Helvetica,sans-serif" font-size="24" fill="#b6c4d7">El copiloto del bolsillo argentino.</text>
   <g transform="translate(835 320) rotate(-6)"><rect width="270" height="190" rx="28" fill="#ffffff"/><rect x="28" y="28" width="110" height="15" rx="7" fill="#dfe5ec"/><rect x="28" y="58" width="178" height="32" rx="9" fill="#09111f"/><rect x="28" y="112" width="62" height="46" rx="11" fill="#c9ff4a"/><rect x="104" y="112" width="62" height="46" rx="11" fill="#55c8ff"/><rect x="180" y="112" width="62" height="46" rx="11" fill="#9c7cff"/></g>
 </svg>

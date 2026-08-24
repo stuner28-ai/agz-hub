@@ -1,10 +1,12 @@
 # UtiliTools v2
 
-Reconstrucción editorial y técnica de [utilitools.com.ar](https://www.utilitools.com.ar/) orientada a utilidad real, AdSense y crecimiento orgánico sostenible.
+Reconstrucción editorial y técnica de [utilitools.com.ar](https://www.utilitools.com.ar/) orientada a utilidad real, AdSense y crecimiento orgánico sostenible. El posicionamiento vigente es **“el copiloto del bolsillo argentino”**: decidir mejor antes de comprar, pagar, cobrar o vender.
 
 ## Principios
 
 - Diez herramientas mantenibles en lugar de decenas de páginas superficiales.
+- Tres territorios conectados: Ahorrar, Emprender y Trabajar.
+- Compra inteligente como puerta de entrada masiva: compara 2x1, 3x2, segunda unidad, descuentos y tamaños distintos.
 - Fórmula, ejemplo, límites, fuentes y fecha de revisión en cada herramienta.
 - Cálculos en el navegador; los valores no se envían al servidor.
 - Analytics bajo consentimiento y AdSense desactivado hasta obtener aprobación.

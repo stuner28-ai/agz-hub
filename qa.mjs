@@ -54,6 +54,18 @@ const sitemap = await readFile(join(root, "sitemap.xml"), "utf8");
 assert.ok((sitemap.match(/<url>/g) || []).length >= 20, "Sitemap incompleto");
 assert.ok(!sitemap.includes(".html</loc>"), "Sitemap contiene URLs heredadas duplicadas");
 
+const home = await readFile(join(root, "index.html"), "utf8");
+assert.ok(home.includes("El copiloto del bolsillo argentino"), "La portada perdió el posicionamiento principal");
+assert.ok(home.includes("href=\"/herramientas/descuentos\""), "La portada no conduce a Compra inteligente");
+
+const toolsIndex = await readFile(join(root, "herramientas", "index.html"), "utf8");
+for (const focus of ["ahorrar", "emprender", "trabajar"]) assert.ok(toolsIndex.includes(`id="${focus}"`), `Falta el foco ${focus} en herramientas`);
+
+const smartBuy = await readFile(join(root, "herramientas", "descuentos", "index.html"), "utf8");
+assert.ok(smartBuy.includes('data-calculator="smart-buy"'), "Compra inteligente no está conectada al calculador");
+assert.ok(smartBuy.includes('data-show-when="promoA:percent,second-unit"'), "Compra inteligente perdió los campos condicionales");
+assert.ok(smartBuy.includes("Resolución 4/2025"), "Compra inteligente no muestra la fuente oficial");
+
 const contact = await readFile(join(root, "contacto", "index.html"), "utf8");
 if (process.env.PUBLIC_CONTACT_EMAIL) {
   assert.ok(contact.includes(`href="mailto:${process.env.PUBLIC_CONTACT_EMAIL}?subject=`), "Contacto no tiene el correo público esperado");

@@ -5,7 +5,7 @@ import {
   calculateAguinaldo,
   calculateBreakEven,
   calculateRoi,
-  calculateDiscounts,
+  calculateSmartBuy,
   calculateCompoundInterest,
   calculate3dPrint,
   calculateMonotributo
@@ -25,7 +25,7 @@ const TOOL_INDEX = {
   aguinaldo: ["Aguinaldo", "/herramientas/aguinaldo"],
   "punto-equilibrio": ["Punto de equilibrio", "/herramientas/punto-equilibrio"],
   "roi-roas": ["ROI y ROAS", "/herramientas/roi-roas"],
-  descuentos: ["Descuentos", "/herramientas/descuentos"],
+  descuentos: ["Compra inteligente", "/herramientas/descuentos"],
   "interes-compuesto": ["Interés compuesto", "/herramientas/interes-compuesto"],
   "costo-impresion-3d": ["Costo impresión 3D", "/herramientas/costo-impresion-3d"]
 };
@@ -76,11 +76,30 @@ const handlers = {
     const shareText = `La campaña deja ${money(result.profit)}, ROI ${percent(result.roiPct)}${result.roas ? ` y ROAS ${decimal(result.roas)}×` : ""}. Calculado en UtiliTools.`;
     return resultView({ label: "Ganancia atribuible", value: money(result.profit), subtitle: result.profit >= 0 ? "Ingresos menos todos los costos cargados." : "Los costos cargados superan los ingresos.", metrics: [metric("ROI", percent(result.roiPct), true), ...(result.roas ? [metric("ROAS", `${decimal(result.roas)}×`)] : []), metric("Costos totales", money(result.totalCosts)), metric("Ingresos para equilibrio", money(result.breakEvenRevenue))], note: "La calidad del resultado depende de que ingresos y costos correspondan al mismo período y criterio de atribución.", shareText });
   },
-  discounts: values => {
-    const result = calculateDiscounts(values);
-    const recovery = Number.isFinite(result.recoveryIncreasePct) ? percent(result.recoveryIncreasePct) : "No recuperable";
-    const shareText = `Precio final ${money(result.finalPrice)}, ahorro efectivo ${percent(result.effectiveDiscountPct)}. Calculado en UtiliTools.`;
-    return resultView({ label: "Precio final", value: money(result.finalPrice), subtitle: "Los descuentos se aplicaron de forma sucesiva.", metrics: [metric("Ahorro", money(result.saved), true), metric("Descuento efectivo", percent(result.effectiveDiscountPct)), metric("Aumento para recuperar", recovery)], shareText });
+  "smart-buy": values => {
+    const result = calculateSmartBuy(values);
+    const headline = result.winner === "tie" ? "Cuestan prácticamente lo mismo" : `Conviene la opción ${result.winner}`;
+    const subtitle = result.winner === "tie"
+      ? `La diferencia es menor a un centavo ${result.referenceLabel}.`
+      : `Es ${percent(result.savingsPct)} más barata al comparar ${result.referenceLabel}.`;
+    const shareText = result.winner === "tie"
+      ? `Las dos ofertas cuestan prácticamente lo mismo ${result.referenceLabel}: A ${money(result.optionA.referencePrice)} y B ${money(result.optionB.referencePrice)}. Comparado en UtiliTools.`
+      : `Conviene la opción ${result.winner}: ahorra ${percent(result.savingsPct)} al comparar ${result.referenceLabel}. A cuesta ${money(result.optionA.referencePrice)} y B ${money(result.optionB.referencePrice)}. Comparado en UtiliTools.`;
+    return resultView({
+      label: "Mejor relación precio-cantidad",
+      value: headline,
+      subtitle,
+      metrics: [
+        metric(`Opción A ${result.referenceLabel}`, money(result.optionA.referencePrice), result.winner === "A"),
+        metric(`Opción B ${result.referenceLabel}`, money(result.optionB.referencePrice), result.winner === "B"),
+        metric("Desembolso promoción A", money(result.optionA.bundlePrice)),
+        metric("Desembolso promoción B", money(result.optionB.bundlePrice)),
+        metric("Descuento efectivo A", percent(result.optionA.effectiveDiscountPct)),
+        metric("Descuento efectivo B", percent(result.optionB.effectiveDiscountPct))
+      ],
+      note: "El menor precio comparable no contempla vencimiento, desperdicio, calidad ni cuánto efectivo necesitás desembolsar.",
+      shareText
+    });
   },
   "compound-interest": values => {
     const result = calculateCompoundInterest(values);
@@ -126,12 +145,23 @@ function restoreForm(form) {
   } catch { /* Ignore invalid local data. */ }
 }
 
+function updateConditionalFields(form) {
+  form.querySelectorAll("[data-show-when]").forEach(container => {
+    const [fieldName, values = ""] = container.dataset.showWhen.split(":");
+    const controller = form.elements.namedItem(fieldName);
+    const visibleValues = values.split(",");
+    container.hidden = !controller || !visibleValues.includes(controller.value);
+  });
+}
+
 function track(eventName, params = {}) {
   if (localStorage.getItem("ut_consent") === "analytics" && typeof window.gtag === "function") window.gtag("event", eventName, params);
 }
 
 document.querySelectorAll("form[data-calculator]").forEach(form => {
   restoreForm(form);
+  updateConditionalFields(form);
+  form.addEventListener("change", () => updateConditionalFields(form));
   form.addEventListener("submit", event => {
     event.preventDefault();
     const error = form.querySelector("[data-form-error]");
@@ -158,6 +188,7 @@ document.querySelectorAll("[data-reset-form]").forEach(button => button.addEvent
   const form = document.querySelector("form[data-calculator]");
   if (!form) return;
   form.reset();
+  updateConditionalFields(form);
   localStorage.removeItem(`ut_form_${form.dataset.toolSlug}`);
   const output = document.querySelector("[data-result-output]");
   const placeholder = document.querySelector(".result-placeholder");
@@ -229,6 +260,10 @@ if (search) search.addEventListener("input", () => {
     const match = !query || card.dataset.searchText.includes(query);
     card.hidden = !match;
     if (match) visible += 1;
+  });
+  document.querySelectorAll("[data-focus-group]").forEach(group => {
+    const cards = [...group.querySelectorAll("[data-search-card]")];
+    group.hidden = cards.length > 0 && cards.every(card => card.hidden);
   });
   const empty = document.querySelector("[data-search-empty]");
   if (empty) empty.hidden = visible > 0;
