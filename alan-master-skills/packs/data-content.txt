@@ -1,0 +1,11 @@
+data-analysis
+kpi-metrics
+dashboard-design
+forecasting
+spreadsheet-analysis
+longform-writing
+editorial-review
+copywriting
+seo-content
+social-content
+summarization

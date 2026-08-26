@@ -1,0 +1,8 @@
+deep-research
+web-research
+fact-checking
+source-synthesis
+competitive-research
+market-research
+trend-analysis
+evidence-grading

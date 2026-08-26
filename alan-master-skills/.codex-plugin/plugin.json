@@ -1,0 +1,23 @@
+{
+  "name": "alan-master-skills",
+  "version": "1.0.0",
+  "description": "Curated high-value Agent Skills for reasoning, research, engineering, product, business, data, and content workflows.",
+  "author": {
+    "name": "Alan"
+  },
+  "license": "MIT",
+  "keywords": [
+    "agent-skills",
+    "chatgpt",
+    "codex",
+    "productivity",
+    "research",
+    "engineering",
+    "business"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Alan Master Skills",
+    "shortDescription": "61 curated reusable Agent Skills"
+  }
+}

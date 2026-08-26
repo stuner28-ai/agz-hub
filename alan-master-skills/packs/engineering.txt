@@ -1,0 +1,15 @@
+software-architecture
+test-driven-development
+systematic-debugging
+code-review
+security-review
+threat-modeling
+api-design
+database-design
+frontend-engineering
+mobile-first-ui
+performance-optimization
+devops-deployment
+observability
+refactoring
+qa-testing

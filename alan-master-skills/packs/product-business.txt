@@ -1,0 +1,12 @@
+product-discovery
+prd-writing
+customer-research
+opportunity-scoring
+business-model
+pricing-strategy
+unit-economics
+growth-marketing
+conversion-optimization
+sales-strategy
+operations-design
+experiment-design

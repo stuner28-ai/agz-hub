@@ -1,0 +1,15 @@
+skill-router
+intent-clarifier
+task-planning
+decision-analysis
+systems-thinking
+root-cause-analysis
+brainstorming
+execution-controller
+verification-before-completion
+tool-selection
+context-management
+workflow-automation
+prompt-engineering
+agent-design
+skill-authoring

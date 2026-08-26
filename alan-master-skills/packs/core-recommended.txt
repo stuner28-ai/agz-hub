@@ -1,0 +1,12 @@
+skill-router
+task-planning
+decision-analysis
+root-cause-analysis
+verification-before-completion
+tool-selection
+context-management
+prompt-engineering
+agent-design
+deep-research
+fact-checking
+workflow-automation
