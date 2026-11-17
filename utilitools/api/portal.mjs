@@ -320,7 +320,8 @@ function seoHtml(body, name, section) {
     '<meta property="og:image:type" content="image/jpeg"><meta property="og:image:width" content="1120"><meta property="og:image:height" content="840">' +
     '<meta property="og:locale" content="es_AR">' +
     '<link rel="icon" href="/favicon.ico" sizes="48x48"><link rel="icon" href="/favicon.svg" type="image/svg+xml">' +
-    '<link rel="apple-touch-icon" href="/apple-touch-icon.png"><meta name="theme-color" content="#101419">' +
+    '<link rel="apple-touch-icon" href="/apple-touch-icon.png">' +
+    (/name=["']theme-color["']/.test(body) ? '' : '<meta name="theme-color" content="#101419">') +
     '<meta name="twitter:card" content="summary_large_image">' + structured;
   body = body.replace(/<title>[^<]*<\/title>/i, '<title>' + pageTitle + '</title>')
     .replace(/<meta\b[^>]*\bname=["']description["'][^>]*>/ig, '')
