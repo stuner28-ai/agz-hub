@@ -1,0 +1,5 @@
+node_modules/
+.vercel/
+# El .gitignore de la raíz ignora imágenes; las de UtiliTools son parte de la fuente.
+!*.png
+!*.ico

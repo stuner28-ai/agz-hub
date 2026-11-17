@@ -1,0 +1,5 @@
+# Solo se despliega lo que usa Vercel: api/portal.mjs, package.json y vercel.json.
+src/
+scripts/
+README.md
+node_modules/

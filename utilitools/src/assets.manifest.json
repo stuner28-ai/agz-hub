@@ -1,0 +1,127 @@
+[
+  {
+    "route": "/app.js",
+    "file": "app.js"
+  },
+  {
+    "route": "/index.html",
+    "file": "index.html"
+  },
+  {
+    "route": "/style.css",
+    "file": "style.css"
+  },
+  {
+    "route": "/herramientas/app.js",
+    "file": "herramientas/app.js"
+  },
+  {
+    "route": "/herramientas/assets/portada-1120.webp",
+    "file": "herramientas/assets/portada-1120.webp",
+    "encoding": "base64"
+  },
+  {
+    "route": "/herramientas/assets/portada-640.webp",
+    "file": "herramientas/assets/portada-640.webp",
+    "encoding": "base64"
+  },
+  {
+    "route": "/herramientas/exports.js",
+    "file": "herramientas/exports.js"
+  },
+  {
+    "route": "/herramientas/guias/calibrar-filamento.html",
+    "file": "herramientas/guias/calibrar-filamento.html"
+  },
+  {
+    "route": "/herramientas/guias/costos-de-impresion.html",
+    "file": "herramientas/guias/costos-de-impresion.html"
+  },
+  {
+    "route": "/herramientas/guias/fidgets-y-holguras.html",
+    "file": "herramientas/guias/fidgets-y-holguras.html"
+  },
+  {
+    "route": "/herramientas/index.html",
+    "file": "herramientas/index.html"
+  },
+  {
+    "route": "/herramientas/materials.js",
+    "file": "herramientas/materials.js"
+  },
+  {
+    "route": "/herramientas/site.css",
+    "file": "herramientas/site.css"
+  },
+  {
+    "route": "/acerca/",
+    "file": "acerca/index.html"
+  },
+  {
+    "route": "/privacidad/",
+    "file": "privacidad/index.html"
+  },
+  {
+    "route": "/categorias/juguetes/",
+    "file": "categorias/juguetes/index.html"
+  },
+  {
+    "route": "/categorias/diy-taller/",
+    "file": "categorias/diy-taller/index.html"
+  },
+  {
+    "route": "/categorias/decoracion/",
+    "file": "categorias/decoracion/index.html"
+  },
+  {
+    "route": "/categorias/organizacion/",
+    "file": "categorias/organizacion/index.html"
+  },
+  {
+    "route": "/categorias/macetas/",
+    "file": "categorias/macetas/index.html"
+  },
+  {
+    "route": "/categorias/miniaturas/",
+    "file": "categorias/miniaturas/index.html"
+  },
+  {
+    "route": "/categorias/repuestos/",
+    "file": "categorias/repuestos/index.html"
+  },
+  {
+    "route": "/categorias/cosplay/",
+    "file": "categorias/cosplay/index.html"
+  },
+  {
+    "route": "/categorias/llaveros/",
+    "file": "categorias/llaveros/index.html"
+  },
+  {
+    "route": "/utilitools-analytics.js",
+    "file": "utilitools-analytics.js"
+  },
+  {
+    "route": "/404.html",
+    "file": "404.html"
+  },
+  {
+    "route": "/favicon.svg",
+    "file": "favicon.svg"
+  },
+  {
+    "route": "/favicon.ico",
+    "file": "favicon.ico",
+    "encoding": "base64"
+  },
+  {
+    "route": "/apple-touch-icon.png",
+    "file": "apple-touch-icon.png",
+    "encoding": "base64"
+  },
+  {
+    "route": "/herramientas/assets/portada-1120.jpg",
+    "file": "herramientas/assets/portada-1120.jpg",
+    "encoding": "base64"
+  }
+]
