@@ -125,3 +125,19 @@ input,select,textarea{background:#11161c;border-color:var(--line);color:var(--in
 #costResult p{color:var(--lime)}
 .editorial a{color:var(--lime)}
 .brand>span.brand-mark:last-child{color:#152011}
+.editorial .byline{color:var(--muted);font-size:13px;margin:-4px 0 14px}
+.editorial .help ul{margin:8px 0 0;padding-left:1.2rem}
+.editorial .help li{margin-bottom:6px}
+.editorial .help li strong{color:var(--ink)}
+.editorial .help p+p{margin-top:10px}
+.editorial .note{font-size:13px;color:var(--muted);margin-top:10px!important}
+.table-wrap{overflow-x:auto;margin-top:10px;border:1px solid var(--line);border-radius:12px}
+.table-wrap table{width:100%;border-collapse:collapse;font-size:14px;min-width:420px}
+.table-wrap th,.table-wrap td{text-align:left;padding:9px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+.table-wrap tr:last-child>*{border-bottom:0}
+.table-wrap thead th{color:var(--muted);font-weight:600;font-size:13px;background:#151b21}
+.table-wrap tbody th{font-weight:600}
+.related-guides ul{list-style:none;padding:0!important}
+.related-guides li{border-top:1px solid var(--line);padding:9px 0;margin:0!important}
+.related-guides .button{margin-top:12px}
+.editorial .button.primary{color:#18200c;text-decoration:none}

@@ -243,8 +243,10 @@ async function serveSite(url) {
       body = body.replace(sectionHeading, '$1<h1$2>$3</h1>');
     }
     if (hostSection || url.hostname === 'www.' + domain) {
+      // /calculadora/ y /perfiles/#x pasan a la raíz de su subdominio; /guias/x.html conserva la ruta.
       for (const section of Object.keys(sections)) {
-        body = body.replaceAll('href="/' + section + '/', 'href="https://' + section + '.' + domain + '/');
+        body = body.replace(new RegExp('href="/' + section + '/([^"]*)"', 'g'), (match, rest) =>
+          'href="https://' + section + '.' + domain + '/' + (rest === '' || rest.startsWith('#') ? rest : section + '/' + rest) + '"');
       }
     }
   }
@@ -308,10 +310,19 @@ async function categoryModels(body, name) {
 }
 
 const web = 'https://www.utilitools.com.ar';
+// archivo: [título SEO, descripción, fecha de actualización o null]
 const guides = {
-  'calibrar-filamento.html': ['Cómo calibrar el filamento para impresión 3D', 'Calibrá una bobina con pruebas de temperatura, flujo y tolerancia antes de imprimir una tanda.'],
-  'costos-de-impresion.html': ['Cómo calcular el costo de una impresión 3D', 'Calculá material, electricidad, desgaste, mano de obra y margen para cotizar impresiones en pesos argentinos.'],
-  'fidgets-y-holguras.html': ['Holguras para fidgets y encastres impresos en 3D', 'Ajustá la separación de bisagras y piezas móviles con pruebas de encastre antes de imprimir un lote.']
+  "calibrar-filamento.html": ["Cómo calibrar el filamento para impresión 3D", "Calibrá una bobina con pruebas de temperatura, flujo y tolerancia antes de imprimir una tanda.", null],
+  "costos-de-impresion.html": ["Cómo calcular el costo de una impresión 3D", "Calculá material, electricidad, desgaste, mano de obra y margen para cotizar impresiones en pesos argentinos.", null],
+  "fidgets-y-holguras.html": ["Holguras para fidgets y encastres impresos en 3D", "Ajustá la separación de bisagras y piezas móviles con pruebas de encastre antes de imprimir un lote.", null],
+  "pla-vs-petg.html": ["PLA o PETG: cuál elegir para cada pieza", "Temperaturas, resistencia al calor y a golpes, acabado y precio: qué filamento conviene para decoración, piezas funcionales y exterior.", "2026-11-17"],
+  "cuanto-cobrar-impresion-3d.html": ["Cuánto cobrar una impresión 3D en Argentina", "Cómo armar el precio con material, máquina, mano de obra, fallos, embalaje y comisión. Ejemplo completo en pesos argentinos.", "2026-11-17"],
+  "vender-en-mercado-libre.html": ["Cómo vender impresiones 3D en Mercado Libre", "Costos de venta, publicaciones que venden, embalaje y licencias: lo que conviene revisar antes de publicar impresiones 3D.", "2026-11-17"],
+  "primera-capa.html": ["Cómo lograr una primera capa perfecta en impresión 3D", "Diagnóstico visual, limpieza de la cama, nivelación y Z offset para que la primera capa se pegue y quede lisa.", "2026-11-17"],
+  "secar-filamento.html": ["Cómo secar el filamento y guardarlo bien", "Señales de humedad, temperaturas y tiempos de secado para PLA, PETG, TPU, ABS y nylon, y cómo guardar las bobinas.", "2026-11-17"],
+  "warping.html": ["Warping en impresión 3D: por qué se levanta la pieza", "Por qué las esquinas se despegan y se curvan, y cómo evitarlo con adhesión, enfriamiento, brim y diseño.", "2026-11-17"],
+  "hilos-stringing.html": ["Cómo eliminar los hilos (stringing) en impresión 3D", "Secado, torre de temperatura, retracción y recorridos para eliminar los hilos entre partes de la pieza.", "2026-11-17"],
+  "licencias-modelos-3d.html": ["Licencias de modelos 3D: qué podés vender", "Creative Commons, licencias de plataformas, marcas y personajes: qué permite cada licencia y cómo citar al autor.", "2026-11-17"]
 };
 const categoryDetails = {"/categorias/juguetes/": ["Juguetes para imprimir en 3D", "Juguetes articulados, fidgets y modelos que se imprimen sin ensamblar. Los más descargados, holguras y configuración recomendada."], "/categorias/diy-taller/": ["DIY y taller para imprimir en 3D", "Soportes para herramientas, paneles Honeycomb y pegboard, guías y plantillas para el taller. Modelos populares y configuración de partida."], "/categorias/decoracion/": ["Decoración para imprimir en 3D", "Floreros, lámparas y adornos de pared para imprimir en 3D. Modelos populares, consejos de acabado y modo espiral."], "/categorias/organizacion/": ["Organización para imprimir en 3D", "Gridfinity, organizadores de cajón y cajas modulares para imprimir. Medidas del sistema, modelos populares y configuración."], "/categorias/macetas/": ["Macetas para imprimir en 3D", "Macetas con drenaje, autorriego y para suculentas. Los modelos más descargados y qué material usar para interior o exterior."], "/categorias/miniaturas/": ["Miniaturas para imprimir en 3D", "Miniaturas para rol y wargames, escenografía y bustos. Modelos populares, escalas y configuración para FDM y resina."], "/categorias/repuestos/": ["Repuestos para imprimir en 3D", "Perillas, clips, tapas y piezas de reemplazo para imprimir. Cómo medir, qué material usar y modelos populares."], "/categorias/cosplay/": ["Cosplay para imprimir en 3D", "Cascos, armaduras y accesorios de cosplay para imprimir en 3D. Cómo escalar, unir, lijar y pintar piezas grandes."], "/categorias/llaveros/": ["Llaveros para imprimir en 3D", "Llaveros personalizados, con nombre y articulados para imprimir y vender. Modelos populares, cambio de color y costos."]};
 const details = {
@@ -357,6 +368,12 @@ function seoHtml(body, name, section) {
     structured = '<script type="application/ld+json">' + JSON.stringify({ '@context':'https://schema.org','@type':'WebSite',
       name:'UtiliTools', url:web+'/', potentialAction:{ '@type':'SearchAction',
         target:web+'/?q={search_term_string}#catalogo', 'query-input':'required name=search_term_string' } }) + '</script>';
+  } else if (guide && Object.hasOwn(guides, guide)) {
+    const [, , updated] = guides[guide];
+    const org = { '@type':'Organization', name:'UtiliTools', url:web+'/', logo:web+'/apple-touch-icon.png' };
+    structured = '<script type="application/ld+json">' + JSON.stringify({ '@context':'https://schema.org','@type':'Article',
+      headline:title, description, inLanguage:'es-AR', mainEntityOfPage:url, image:logo, author:org, publisher:org,
+      ...(updated ? { datePublished:updated, dateModified:updated } : {}) }) + '</script>';
   } else if (Object.hasOwn(categoryDetails, name)) {
     structured = '<script type="application/ld+json">' + JSON.stringify({ '@context':'https://schema.org','@type':'BreadcrumbList',
       itemListElement:[{ '@type':'ListItem', position:1, name:'Inicio', item:web+'/' },
@@ -397,7 +414,10 @@ function crawlFile(url, section) {
     section ? ['/'] : ['/', '/acerca/', '/privacidad/', ...Object.keys(categoryDetails)];
   const content = '<?xml version="1.0" encoding="UTF-8"?>' +
     '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">' +
-    paths.map(path => '<url><loc>' + origin + path + '</loc></url>').join('') + '</urlset>';
+    paths.map(path => {
+      const updated = path.startsWith('/guias/') && guides[path.slice(7)]?.[2];
+      return '<url><loc>' + origin + path + '</loc>' + (updated ? '<lastmod>' + updated + '</lastmod>' : '') + '</url>';
+    }).join('') + '</urlset>';
   return new Response(content, { headers: { ...headers, 'content-type':'application/xml; charset=utf-8' } });
 }
 
