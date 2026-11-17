@@ -286,7 +286,7 @@ async function categoryModels(body, name) {
   try {
     const timeout = new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 4000));
     models = (await Promise.race([searchPrintables(query, true, 1), timeout]))
-      .filter(model => model.image)
+      .filter(model => model.image && !/\.gif$/i.test(model.image))
       .sort((a, b) => (b.downloads ?? 0) - (a.downloads ?? 0))
       .slice(0, 12);
   } catch (error) {
