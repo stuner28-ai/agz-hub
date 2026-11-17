@@ -1,5 +1,15 @@
 import { load } from 'cheerio';
+import { createHash } from 'node:crypto';
 const assets = __ASSETS__;
+// Cambia con cada versión del sitio: se agrega a las URLs de CSS/JS para poder cachearlos mucho tiempo.
+const assetVersion = createHash('sha1').update(JSON.stringify(assets)).digest('hex').slice(0, 10);
+const binaryTypes = { webp: 'image/webp', jpg: 'image/jpeg', png: 'image/png', ico: 'image/x-icon' };
+const binaryCache = new Map();
+const cachePolicy = {
+  html: 'public, max-age=0, must-revalidate, s-maxage=600, stale-while-revalidate=86400',
+  versioned: 'public, max-age=31536000, immutable',
+  static: 'public, max-age=3600, s-maxage=86400, stale-while-revalidate=604800'
+};
 const printablesEndpoint = 'https://api.printables.com/graphql/';
 const query = `query Models($q: String!, $ordering: SearchChoicesEnum, $offset: Int) {
   searchPrints2(query: $q, printType: print, limit: 48, offset: $offset, ordering: $ordering) {
@@ -208,20 +218,27 @@ function serveSite(url) {
     name = '/index.html';
   }
 
-  if (!Object.hasOwn(assets, name)) return new Response('Página no encontrada', { status: 404 });
+  let status = 200;
+  if (!Object.hasOwn(assets, name)) {
+    name = '/404.html';
+    section = undefined;
+    status = 404;
+  }
   const extension = name.endsWith('/') ? 'html' : name.split('.').at(-1);
   const types = { html: 'text/html; charset=utf-8', css: 'text/css; charset=utf-8',
-    js: 'text/javascript; charset=utf-8', webp: 'image/webp' };
+    js: 'text/javascript; charset=utf-8', svg: 'image/svg+xml', ...binaryTypes };
   let body = assets[name];
-  if (extension === 'webp') {
-    body = Uint8Array.from(atob(body), char => char.charCodeAt(0));
+  if (Object.hasOwn(binaryTypes, extension)) {
+    if (!binaryCache.has(name)) binaryCache.set(name, Buffer.from(body, 'base64'));
+    body = binaryCache.get(name);
   } else if (extension === 'html') {
     body = body.replaceAll('__SEARCH_HOME__', searchHome);
     if (section) {
       const [title, anchor] = sections[section];
       body = body.replace(/<title>[^<]*<\/title>/, '<title>' + title + ' | UtiliTools 3D</title>')
         .replace('<body id="inicio">', '<body id="inicio" data-tool="' + section + '">')
-        .replace('href="#perfiles">Ir al buscador de perfiles', 'href="#' + anchor + '">Ir a la herramienta');
+        .replace('href="#perfiles">Ir al buscador de perfiles', 'href="#' + anchor + '">Ir a la herramienta')
+        .replace(/(<section class="hero">[\s\S]*?)<h1>([\s\S]*?)<\/h1>/, '$1<p class="hero-title">$2</p>');
       const sectionHeading = new RegExp('(id="' + anchor + '"[^>]*>[\\s\\S]*?)<h2([^>]*)>(.*?)</h2>');
       body = body.replace(sectionHeading, '$1<h1$2>$3</h1>');
     }
@@ -233,11 +250,17 @@ function serveSite(url) {
   }
   if (extension === 'html') {
     body = seoHtml(body, name, section);
+    body = body.replace(/\b(href|src)="((?:\/|\.\.\/)[^"?#:]+\.(?:css|js))"/g, '$1="$2?v=' + assetVersion + '"');
     if(analyticsEnabled) body=body.replace('</body>',
       '<div style="max-width:1100px;margin:1rem auto;padding:0 1rem;font-size:.9rem"><label><input id="analytics-consent" type="checkbox"> Permitir estadísticas de uso</label> · <a href="https://www.utilitools.com.ar/privacidad/">Privacidad</a></div><script src="/utilitools-analytics.js" defer></script></body>');
   }
+  const cacheControl = status !== 200 ? 'public, max-age=0, s-maxage=300'
+    : extension === 'html' ? cachePolicy.html
+    : url.searchParams.get('v') === assetVersion ? cachePolicy.versioned
+    : cachePolicy.static;
   return new Response(body, {
-    headers: { 'content-type': types[extension], 'cache-control': 'no-cache' }
+    status,
+    headers: { 'content-type': types[extension], 'cache-control': cacheControl }
   });
 }
 
@@ -275,6 +298,10 @@ function seoHtml(body, name, section) {
     title = privacy ? 'Privacidad' : 'Acerca del portal maker';
     description = privacy ? 'Cómo UtiliTools procesa las búsquedas, los archivos de perfiles y los datos técnicos del sitio.' : 'Conocé cómo funcionan el buscador, la calculadora y las guías gratuitas de UtiliTools.';
     url = web + name;
+  } else if (name === '/404.html') {
+    title = 'Página no encontrada';
+    description = 'La página que buscás no existe. Buscá modelos 3D o elegí una categoría.';
+    noindex = true;
   } else if (name !== '/index.html') {
     title = 'Herramientas de impresión 3D';
     description = 'Perfiles, filamentos, guías y calculadora de impresión 3D.';
@@ -282,7 +309,7 @@ function seoHtml(body, name, section) {
     noindex = true;
   }
   const pageTitle = title + ' | UtiliTools';
-  const logo = web + '/herramientas/assets/portada-1120.webp';
+  const logo = web + '/herramientas/assets/portada-1120.jpg';
   const structured = name === '/index.html' ? '<script type="application/ld+json">' +
     JSON.stringify({ '@context':'https://schema.org','@type':'WebSite',name:'UtiliTools',url:web+'/' }) + '</script>' : '';
   const metadata = '<meta name="description" content="' + description + '"><link rel="canonical" href="' + url + '">' +
@@ -290,6 +317,10 @@ function seoHtml(body, name, section) {
     '<meta property="og:type" content="website"><meta property="og:site_name" content="UtiliTools">' +
     '<meta property="og:title" content="' + pageTitle + '"><meta property="og:description" content="' + description + '">' +
     '<meta property="og:url" content="' + url + '"><meta property="og:image" content="' + logo + '">' +
+    '<meta property="og:image:type" content="image/jpeg"><meta property="og:image:width" content="1120"><meta property="og:image:height" content="840">' +
+    '<meta property="og:locale" content="es_AR">' +
+    '<link rel="icon" href="/favicon.ico" sizes="48x48"><link rel="icon" href="/favicon.svg" type="image/svg+xml">' +
+    '<link rel="apple-touch-icon" href="/apple-touch-icon.png"><meta name="theme-color" content="#101419">' +
     '<meta name="twitter:card" content="summary_large_image">' + structured;
   body = body.replace(/<title>[^<]*<\/title>/i, '<title>' + pageTitle + '</title>')
     .replace(/<meta\b[^>]*\bname=["']description["'][^>]*>/ig, '')

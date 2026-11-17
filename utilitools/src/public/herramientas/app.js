@@ -214,6 +214,8 @@ calculateCost();
   if (!form) return;
   const panel = document.getElementById('quote-tools');
   const input = document.getElementById('slicer-file');
+  const fileName = document.getElementById('slicer-file-name');
+  input?.addEventListener('change', () => { if (fileName) fileName.textContent = input.files?.[0]?.name ?? 'Ningún archivo seleccionado'; });
   const status = document.getElementById('import-status');
   const plate = document.getElementById('slicer-plate');
   const settingsStatus = document.getElementById('settings-status');

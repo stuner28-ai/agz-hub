@@ -100,5 +100,28 @@
   {
     "route": "/utilitools-analytics.js",
     "file": "utilitools-analytics.js"
+  },
+  {
+    "route": "/404.html",
+    "file": "404.html"
+  },
+  {
+    "route": "/favicon.svg",
+    "file": "favicon.svg"
+  },
+  {
+    "route": "/favicon.ico",
+    "file": "favicon.ico",
+    "encoding": "base64"
+  },
+  {
+    "route": "/apple-touch-icon.png",
+    "file": "apple-touch-icon.png",
+    "encoding": "base64"
+  },
+  {
+    "route": "/herramientas/assets/portada-1120.jpg",
+    "file": "herramientas/assets/portada-1120.jpg",
+    "encoding": "base64"
   }
 ]
