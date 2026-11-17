@@ -1,0 +1,7 @@
+{
+  "framework": null,
+  "rewrites": [
+    { "source": "/", "destination": "/api/portal?__portal_path=/" },
+    { "source": "/:path((?!api/portal$).*)", "destination": "/api/portal?__portal_path=/:path" }
+  ]
+}
