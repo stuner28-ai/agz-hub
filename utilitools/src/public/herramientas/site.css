@@ -1,4 +1,3 @@
-@import url('https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@500;600&display=swap');
 :root{--bg:#f7f7fc;--panel:#fff;--ink:#211d38;--muted:#5b566e;--line:#e1deed;--purple:#5c39bb;--accent:#e5ff80;--dark:#15142b;--round:18px;color-scheme:light}
 *{box-sizing:border-box}
 html{scroll-behavior:smooth;scroll-padding-top:18px}
@@ -156,3 +155,8 @@ input,select,textarea{background:#11161c;border-color:var(--line);color:var(--in
 .visually-hidden{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
 .drop-zone{transition:border-color .15s,background .15s}
 .drop-zone.dragging{border-color:var(--lime);border-style:dashed;background:#1d2620}
+.quote-box .box-title{font-size:1.17em;letter-spacing:normal;margin:0 0 8px}
+#context{min-height:2.6em}
+#perfiles .list{min-height:550px}
+#perfiles .detail{min-height:620px}
+@media(max-width:660px){#perfiles .list{min-height:230px}#perfiles .detail{min-height:880px}}
