@@ -181,7 +181,7 @@ const site = {
     }
     const thumb = url.pathname.match(/^\/api\/thumbnail\/(\d{1,2})$/);
     if (thumb) return catalogThumbnail(Number(thumb[1]));
-    return serveSite(url);
+    return await serveSite(url);
   }
 };
 
@@ -196,7 +196,7 @@ function sectionHost(hostname) {
   return Object.keys(sections).find(section => hostname === section + '.' + domain);
 }
 
-function serveSite(url) {
+async function serveSite(url) {
   const hostSection = sectionHost(url.hostname);
   const crawler = crawlFile(url, hostSection);
   if (crawler) return crawler;
@@ -248,6 +248,12 @@ function serveSite(url) {
       }
     }
   }
+  let degraded = false;
+  if (extension === 'html' && body.includes('<!--MODELOS:')) {
+    const rendered = await categoryModels(body, name);
+    body = rendered.body;
+    degraded = rendered.degraded;
+  }
   if (extension === 'html') {
     body = seoHtml(body, name, section);
     body = body.replace(/\b(href|src)="((?:\/|\.\.\/)[^"?#:]+\.(?:css|js))"/g, '$1="$2?v=' + assetVersion + '"');
@@ -255,6 +261,7 @@ function serveSite(url) {
       '<div style="max-width:1100px;margin:1rem auto;padding:0 1rem;font-size:.9rem"><label><input id="analytics-consent" type="checkbox"> Permitir estadísticas de uso</label> · <a href="https://www.utilitools.com.ar/privacidad/">Privacidad</a></div><script src="/utilitools-analytics.js" defer></script></body>');
   }
   const cacheControl = status !== 200 ? 'public, max-age=0, s-maxage=300'
+    : degraded ? 'public, max-age=0, s-maxage=60'
     : extension === 'html' ? cachePolicy.html
     : url.searchParams.get('v') === assetVersion ? cachePolicy.versioned
     : cachePolicy.static;
@@ -265,13 +272,48 @@ function serveSite(url) {
 }
 
 
+const escapeHtml = value => String(value ?? '').replace(/[&<>"']/g, char =>
+  ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[char]);
+const licenseLabels = { commercial: 'Uso comercial', personal: 'No comercial', unknown: 'Licencia a revisar' };
+
+// Completa <!--MODELOS:consulta--> con los modelos más descargados de Printables.
+// Si la fuente no responde a tiempo, deja un enlace al buscador y se cachea menos.
+async function categoryModels(body, name) {
+  const marker = body.match(/<!--MODELOS:([^>]{1,80})-->/);
+  const query = marker[1].trim();
+  const searchLink = '/?q=' + encodeURIComponent(query) + '#catalogo';
+  let models = [];
+  try {
+    const timeout = new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 4000));
+    models = (await Promise.race([searchPrintables(query, true, 1), timeout]))
+      .filter(model => model.image)
+      .sort((a, b) => (b.downloads ?? 0) - (a.downloads ?? 0))
+      .slice(0, 12);
+  } catch (error) {
+    console.warn('Category models unavailable', name, error.message);
+  }
+  if (!models.length) {
+    return { degraded: true, body: body.replace(marker[0],
+      '<p class="models-fallback">No pudimos cargar los modelos en este momento. <a href="' + searchLink + '">Buscalos en el buscador →</a></p>') };
+  }
+  const cards = models.map(model => '<a class="model-card" href="' + escapeHtml(model.url) + '" target="_blank" rel="noopener noreferrer">' +
+    '<img src="' + escapeHtml(model.image) + '" alt="' + escapeHtml(model.title) + '" width="640" height="480" loading="lazy" decoding="async">' +
+    '<div><strong>' + escapeHtml(model.title) + '</strong><small><span>' + escapeHtml(model.repo) +
+    (model.downloads ? ' · ' + Number(model.downloads).toLocaleString('es-AR') + ' descargas' : '') + '</span>' +
+    '<span class="lic ' + model.licenseStatus + '">' + licenseLabels[model.licenseStatus] + '</span></small></div></a>').join('');
+  const itemList = { '@context': 'https://schema.org', '@type': 'ItemList', itemListElement:
+    models.map((model, index) => ({ '@type': 'ListItem', position: index + 1, url: model.url, name: model.title })) };
+  return { degraded: false, body: body.replace(marker[0], '<div class="model-grid">' + cards + '</div>' +
+    '<script type="application/ld+json">' + JSON.stringify(itemList).replace(/</g, '\\u003c') + '</script>') };
+}
+
 const web = 'https://www.utilitools.com.ar';
 const guides = {
   'calibrar-filamento.html': ['Cómo calibrar el filamento para impresión 3D', 'Calibrá una bobina con pruebas de temperatura, flujo y tolerancia antes de imprimir una tanda.'],
   'costos-de-impresion.html': ['Cómo calcular el costo de una impresión 3D', 'Calculá material, electricidad, desgaste, mano de obra y margen para cotizar impresiones en pesos argentinos.'],
   'fidgets-y-holguras.html': ['Holguras para fidgets y encastres impresos en 3D', 'Ajustá la separación de bisagras y piezas móviles con pruebas de encastre antes de imprimir un lote.']
 };
-const categoryDetails = {"/categorias/juguetes/": ["Juguetes para imprimir en 3D", "Para juguetes articulados, revisá que las uniones se impriman separadas y evitá agregar soportes dentro de bisagras."], "/categorias/diy-taller/": ["DIY y taller para imprimir en 3D", "Medí el mango de la herramienta y la distancia entre los anclajes antes de elegir un soporte."], "/categorias/decoracion/": ["Decoración para imprimir en 3D", "Para un florero decorativo o una pantalla, decidí desde el principio si necesitás paredes completas, un fondo cerrado y soporte."], "/categorias/organizacion/": ["Organización para imprimir en 3D", "Gridfinity usa una cuadrícula nominal de 42 × 42 mm. Una caja de 2 × 1 ocupa dos módulos de largo y uno de ancho."], "/categorias/macetas/": ["Macetas para imprimir en 3D", "Elegí el diámetro útil según el cepellón y revisá si el modelo tiene drenaje o depósito integrado."], "/categorias/miniaturas/": ["Miniaturas para imprimir en 3D", "Compará la altura de la figura y el diámetro de su base con las miniaturas que ya tenés."], "/categorias/repuestos/": ["Repuestos para imprimir en 3D", "Buscá por la marca y el modelo del objeto. Medí ejes, agujeros y trabas con un calibre."], "/categorias/cosplay/": ["Cosplay para imprimir en 3D", "Tomá medidas sobre la ropa que vas a usar y comparalas con las dimensiones internas del archivo."], "/categorias/llaveros/": ["Llaveros para imprimir en 3D", "Revisá que el agujero admita tu argolla y que el borde tenga suficiente material alrededor."]};
+const categoryDetails = {"/categorias/juguetes/": ["Juguetes para imprimir en 3D", "Juguetes articulados, fidgets y modelos que se imprimen sin ensamblar. Los más descargados, holguras y configuración recomendada."], "/categorias/diy-taller/": ["DIY y taller para imprimir en 3D", "Soportes para herramientas, paneles Honeycomb y pegboard, guías y plantillas para el taller. Modelos populares y configuración de partida."], "/categorias/decoracion/": ["Decoración para imprimir en 3D", "Floreros, lámparas y adornos de pared para imprimir en 3D. Modelos populares, consejos de acabado y modo espiral."], "/categorias/organizacion/": ["Organización para imprimir en 3D", "Gridfinity, organizadores de cajón y cajas modulares para imprimir. Medidas del sistema, modelos populares y configuración."], "/categorias/macetas/": ["Macetas para imprimir en 3D", "Macetas con drenaje, autorriego y para suculentas. Los modelos más descargados y qué material usar para interior o exterior."], "/categorias/miniaturas/": ["Miniaturas para imprimir en 3D", "Miniaturas para rol y wargames, escenografía y bustos. Modelos populares, escalas y configuración para FDM y resina."], "/categorias/repuestos/": ["Repuestos para imprimir en 3D", "Perillas, clips, tapas y piezas de reemplazo para imprimir. Cómo medir, qué material usar y modelos populares."], "/categorias/cosplay/": ["Cosplay para imprimir en 3D", "Cascos, armaduras y accesorios de cosplay para imprimir en 3D. Cómo escalar, unir, lijar y pintar piezas grandes."], "/categorias/llaveros/": ["Llaveros para imprimir en 3D", "Llaveros personalizados, con nombre y articulados para imprimir y vender. Modelos populares, cambio de color y costos."]};
 const details = {
   calculadora: ['Calculadora de costos de impresión 3D en ARS', 'Calculá el costo de PLA, PETG y otros materiales, electricidad y mano de obra. Estimá un precio por pieza o por lote en pesos argentinos.'],
   perfiles: ['Perfiles y filamentos para impresoras 3D', 'Consultá perfiles iniciales y filtrá por impresora, filamento y tipo de pieza. Compará parámetros para PLA, PETG y otros materiales.'],
@@ -310,8 +352,16 @@ function seoHtml(body, name, section) {
   }
   const pageTitle = title + ' | UtiliTools';
   const logo = web + '/herramientas/assets/portada-1120.jpg';
-  const structured = name === '/index.html' ? '<script type="application/ld+json">' +
-    JSON.stringify({ '@context':'https://schema.org','@type':'WebSite',name:'UtiliTools',url:web+'/' }) + '</script>' : '';
+  let structured = '';
+  if (name === '/index.html') {
+    structured = '<script type="application/ld+json">' + JSON.stringify({ '@context':'https://schema.org','@type':'WebSite',
+      name:'UtiliTools', url:web+'/', potentialAction:{ '@type':'SearchAction',
+        target:web+'/?q={search_term_string}#catalogo', 'query-input':'required name=search_term_string' } }) + '</script>';
+  } else if (Object.hasOwn(categoryDetails, name)) {
+    structured = '<script type="application/ld+json">' + JSON.stringify({ '@context':'https://schema.org','@type':'BreadcrumbList',
+      itemListElement:[{ '@type':'ListItem', position:1, name:'Inicio', item:web+'/' },
+        { '@type':'ListItem', position:2, name:categoryDetails[name][0].replace(/ para imprimir en 3D$/, ''), item:url }] }) + '</script>';
+  }
   const metadata = '<meta name="description" content="' + description + '"><link rel="canonical" href="' + url + '">' +
     '<meta name="robots" content="' + (noindex ? 'noindex,follow' : 'index,follow') + '">' +
     '<meta property="og:type" content="website"><meta property="og:site_name" content="UtiliTools">' +
