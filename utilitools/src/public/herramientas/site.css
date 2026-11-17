@@ -1,4 +1,3 @@
-@import url('https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@500;600&display=swap');
 :root{--bg:#f7f7fc;--panel:#fff;--ink:#211d38;--muted:#5b566e;--line:#e1deed;--purple:#5c39bb;--accent:#e5ff80;--dark:#15142b;--round:18px;color-scheme:light}
 *{box-sizing:border-box}
 html{scroll-behavior:smooth;scroll-padding-top:18px}
@@ -141,3 +140,23 @@ input,select,textarea{background:#11161c;border-color:var(--line);color:var(--in
 .related-guides li{border-top:1px solid var(--line);padding:9px 0;margin:0!important}
 .related-guides .button{margin-top:12px}
 .editorial .button.primary{color:#18200c;text-decoration:none}
+.price-summary{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr));gap:12px;margin-bottom:14px}
+.price-summary>div{display:grid;gap:2px;padding:16px 18px;border-radius:14px;background:#1d2620;border:1px solid #4f6b3a}
+.price-summary>div+div{background:var(--panel);border-color:var(--line)}
+.price-summary span{font-size:13px;color:var(--muted)}
+.price-summary strong{font-size:clamp(28px,4vw,38px);line-height:1.1;letter-spacing:-.03em;color:var(--lime)}
+.price-summary>div+div strong{color:var(--ink)}
+.price-summary small{font-size:12px;color:var(--muted)}
+.price-error{color:#ffcf96;font-weight:700;margin:0}
+.cost-breakdown{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:0 24px;margin:0;border-top:1px solid var(--line)}
+.cost-breakdown>div{display:flex;justify-content:space-between;gap:12px;padding:9px 2px;border-bottom:1px solid var(--line)}
+.cost-breakdown dt{color:var(--muted);font-size:13px}
+.cost-breakdown dd{margin:0;font:650 13px/1.4 "IBM Plex Mono",ui-monospace,monospace}
+.visually-hidden{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+.drop-zone{transition:border-color .15s,background .15s}
+.drop-zone.dragging{border-color:var(--lime);border-style:dashed;background:#1d2620}
+.quote-box .box-title{font-size:1.17em;letter-spacing:normal;margin:0 0 8px}
+#context{min-height:2.6em}
+#perfiles .list{min-height:550px}
+#perfiles .detail{min-height:620px}
+@media(max-width:660px){#perfiles .list{min-height:230px}#perfiles .detail{min-height:880px}}

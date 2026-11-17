@@ -430,6 +430,8 @@ function seoHtml(body, name, section) {
     '<meta property="og:url" content="' + url + '"><meta property="og:image" content="' + logo + '">' +
     '<meta property="og:image:type" content="image/jpeg"><meta property="og:image:width" content="1120"><meta property="og:image:height" content="840">' +
     '<meta property="og:locale" content="es_AR">' +
+    '<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>' +
+    '<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@500;600&display=swap">' +
     '<link rel="icon" href="/favicon.ico" sizes="48x48"><link rel="icon" href="/favicon.svg" type="image/svg+xml">' +
     '<link rel="apple-touch-icon" href="/apple-touch-icon.png">' +
     (/name=["']theme-color["']/.test(body) ? '' : '<meta name="theme-color" content="#101419">') +
