@@ -108,7 +108,7 @@ async function catalogThumbnail(index) {
 
 const analyticsEvents = {
   page_view: [['channel',['search','social','referral','direct','internal']],
-    ['category',['juguetes','diy-taller','decoracion','organizacion','macetas','miniaturas','repuestos','cosplay','llaveros']]],
+    ['category',['juguetes','diy-taller','decoracion','organizacion','macetas','miniaturas','repuestos','cosplay','llaveros','gamer','cocina','mascotas','electronica']]],
   model_opened:[], calculator_opened:[],
   search_completed:[['result',['found','empty','more','error']]],
   filter_changed:[['format',['STL','3MF','OBJ','STEP','all']],['price',['gratis','pago','all']],
@@ -366,9 +366,14 @@ const guides = {
   "secar-filamento.html": ["Cómo secar el filamento y guardarlo bien", "Señales de humedad, temperaturas y tiempos de secado para PLA, PETG, TPU, ABS y nylon, y cómo guardar las bobinas.", "2026-11-17"],
   "warping.html": ["Warping en impresión 3D: por qué se levanta la pieza", "Por qué las esquinas se despegan y se curvan, y cómo evitarlo con adhesión, enfriamiento, brim y diseño.", "2026-11-17"],
   "hilos-stringing.html": ["Cómo eliminar los hilos (stringing) en impresión 3D", "Secado, torre de temperatura, retracción y recorridos para eliminar los hilos entre partes de la pieza.", "2026-11-17"],
-  "licencias-modelos-3d.html": ["Licencias de modelos 3D: qué podés vender", "Creative Commons, licencias de plataformas, marcas y personajes: qué permite cada licencia y cómo citar al autor.", "2026-11-17"]
+  "licencias-modelos-3d.html": ["Licencias de modelos 3D: qué podés vender", "Creative Commons, licencias de plataformas, marcas y personajes: qué permite cada licencia y cómo citar al autor.", "2026-11-17"],
+  "soportes.html": ["Soportes fáciles de retirar en impresión 3D", "Cuándo hacen falta, soportes normales o en árbol, distancias Z y XY, interfaz y el truco del PETG para que salgan limpios.", "2026-11-17"],
+  "multicolor.html": ["Impresión 3D multicolor con menos purga", "Cambio por capa, sistemas multimaterial y cómo reducir la purga, el tiempo y el costo de imprimir en varios colores.", "2026-11-17"],
+  "tpu-flexibles.html": ["Cómo imprimir TPU y filamentos flexibles", "Dureza Shore, extrusor directo o bowden, temperaturas, velocidad y cuidados para imprimir TPU sin que se trabe.", "2026-11-17"],
+  "boquillas.html": ["Qué boquilla usar en tu impresora 3D", "Tamaños de 0,2 a 0,8 mm, latón o acero endurecido, señales de desgaste y cómo cambiar la boquilla.", "2026-11-17"],
+  "mantenimiento.html": ["Mantenimiento básico de la impresora 3D", "Rutina por frecuencia, lubricación, correas, atascos y seguridad para que tu impresora falle menos y dure más.", "2026-11-17"]
 };
-const categoryDetails = {"/categorias/juguetes/": ["Juguetes para imprimir en 3D", "Juguetes articulados, fidgets y modelos que se imprimen sin ensamblar. Los más descargados, holguras y configuración recomendada."], "/categorias/diy-taller/": ["DIY y taller para imprimir en 3D", "Soportes para herramientas, paneles Honeycomb y pegboard, guías y plantillas para el taller. Modelos populares y configuración de partida."], "/categorias/decoracion/": ["Decoración para imprimir en 3D", "Floreros, lámparas y adornos de pared para imprimir en 3D. Modelos populares, consejos de acabado y modo espiral."], "/categorias/organizacion/": ["Organización para imprimir en 3D", "Gridfinity, organizadores de cajón y cajas modulares para imprimir. Medidas del sistema, modelos populares y configuración."], "/categorias/macetas/": ["Macetas para imprimir en 3D", "Macetas con drenaje, autorriego y para suculentas. Los modelos más descargados y qué material usar para interior o exterior."], "/categorias/miniaturas/": ["Miniaturas para imprimir en 3D", "Miniaturas para rol y wargames, escenografía y bustos. Modelos populares, escalas y configuración para FDM y resina."], "/categorias/repuestos/": ["Repuestos para imprimir en 3D", "Perillas, clips, tapas y piezas de reemplazo para imprimir. Cómo medir, qué material usar y modelos populares."], "/categorias/cosplay/": ["Cosplay para imprimir en 3D", "Cascos, armaduras y accesorios de cosplay para imprimir en 3D. Cómo escalar, unir, lijar y pintar piezas grandes."], "/categorias/llaveros/": ["Llaveros para imprimir en 3D", "Llaveros personalizados, con nombre y articulados para imprimir y vender. Modelos populares, cambio de color y costos."]};
+const categoryDetails = {"/categorias/juguetes/": ["Juguetes para imprimir en 3D", "Juguetes articulados, fidgets y modelos que se imprimen sin ensamblar. Los más descargados, holguras y configuración recomendada."], "/categorias/diy-taller/": ["DIY y taller para imprimir en 3D", "Soportes para herramientas, paneles Honeycomb y pegboard, guías y plantillas para el taller. Modelos populares y configuración de partida."], "/categorias/decoracion/": ["Decoración para imprimir en 3D", "Floreros, lámparas y adornos de pared para imprimir en 3D. Modelos populares, consejos de acabado y modo espiral."], "/categorias/organizacion/": ["Organización para imprimir en 3D", "Gridfinity, organizadores de cajón y cajas modulares para imprimir. Medidas del sistema, modelos populares y configuración."], "/categorias/macetas/": ["Macetas para imprimir en 3D", "Macetas con drenaje, autorriego y para suculentas. Los modelos más descargados y qué material usar para interior o exterior."], "/categorias/miniaturas/": ["Miniaturas para imprimir en 3D", "Miniaturas para rol y wargames, escenografía y bustos. Modelos populares, escalas y configuración para FDM y resina."], "/categorias/repuestos/": ["Repuestos para imprimir en 3D", "Perillas, clips, tapas y piezas de reemplazo para imprimir. Cómo medir, qué material usar y modelos populares."], "/categorias/cosplay/": ["Cosplay para imprimir en 3D", "Cascos, armaduras y accesorios de cosplay para imprimir en 3D. Cómo escalar, unir, lijar y pintar piezas grandes."], "/categorias/llaveros/": ["Llaveros para imprimir en 3D", "Llaveros personalizados, con nombre y articulados para imprimir y vender. Modelos populares, cambio de color y costos."], "/categorias/gamer/": ["Accesorios gamer para imprimir en 3D", "Soportes para joysticks y auriculares, organizadores de juegos y pasacables para imprimir en 3D. Modelos populares y configuración."], "/categorias/cocina/": ["Accesorios de cocina para imprimir en 3D", "Organizadores, soportes de esponja, ganchos y cortantes de galletitas. Qué material usar y cuidados con el contacto con alimentos."], "/categorias/mascotas/": ["Accesorios para mascotas para imprimir en 3D", "Soportes para comederos, chapitas y colgadores de correas para imprimir en 3D, con consejos de seguridad para perros y gatos."], "/categorias/electronica/": ["Electrónica: cajas y soportes para imprimir en 3D", "Gabinetes para Raspberry Pi y Arduino, cajas de proyectos y organizadores de cables. Holguras, ventilación y material recomendado."]};
 const details = {
   calculadora: ['Calculadora de costos de impresión 3D en ARS', 'Calculá el costo de PLA, PETG y otros materiales, electricidad y mano de obra. Estimá un precio por pieza o por lote en pesos argentinos.'],
   perfiles: ['Perfiles y filamentos para impresoras 3D', 'Consultá perfiles iniciales y filtrá por impresora, filamento y tipo de pieza. Compará parámetros para PLA, PETG y otros materiales.'],
@@ -406,7 +411,15 @@ function seoHtml(body, name, section) {
     noindex = true;
   }
   const pageTitle = title + ' | UtiliTools';
-  const logo = web + '/herramientas/assets/portada-1120.jpg';
+  // Imagen para compartir: propia en guías y categorías, portada general en el resto.
+  let logo = web + '/herramientas/assets/portada-1120.jpg';
+  let image = { type: 'image/jpeg', width: 1120, height: 840 };
+  const ogPath = guide && Object.hasOwn(guides, guide) ? '/og/guias/' + guide.replace(/\.html$/, '.png')
+    : Object.hasOwn(categoryDetails, name) ? '/og/categorias/' + name.split('/').at(-2) + '.png' : null;
+  if (ogPath && Object.hasOwn(assets, ogPath)) {
+    logo = web + ogPath;
+    image = { type: 'image/png', width: 1200, height: 630 };
+  }
   let structured = '';
   if (name === '/index.html') {
     structured = '<script type="application/ld+json">' + JSON.stringify({ '@context':'https://schema.org','@type':'WebSite',
@@ -428,7 +441,8 @@ function seoHtml(body, name, section) {
     '<meta property="og:type" content="website"><meta property="og:site_name" content="UtiliTools">' +
     '<meta property="og:title" content="' + pageTitle + '"><meta property="og:description" content="' + description + '">' +
     '<meta property="og:url" content="' + url + '"><meta property="og:image" content="' + logo + '">' +
-    '<meta property="og:image:type" content="image/jpeg"><meta property="og:image:width" content="1120"><meta property="og:image:height" content="840">' +
+    '<meta property="og:image:type" content="' + image.type + '"><meta property="og:image:width" content="' + image.width + '"><meta property="og:image:height" content="' + image.height + '">' +
+    '<meta property="og:image:alt" content="' + pageTitle.replace(/"/g, '&quot;') + '">' +
     '<meta property="og:locale" content="es_AR">' +
     '<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>' +
     '<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@500;600&display=swap">' +

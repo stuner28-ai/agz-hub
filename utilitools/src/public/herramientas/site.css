@@ -160,3 +160,4 @@ input,select,textarea{background:#11161c;border-color:var(--line);color:var(--in
 #perfiles .list{min-height:550px}
 #perfiles .detail{min-height:620px}
 @media(max-width:660px){#perfiles .list{min-height:230px}#perfiles .detail{min-height:880px}}
+.related-cats{margin-top:12px!important;color:var(--muted)}

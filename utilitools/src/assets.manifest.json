@@ -155,5 +155,186 @@
   {
     "route": "/herramientas/guias/licencias-modelos-3d.html",
     "file": "herramientas/guias/licencias-modelos-3d.html"
+  },
+  {
+    "route": "/categorias/gamer/",
+    "file": "categorias/gamer/index.html"
+  },
+  {
+    "route": "/categorias/cocina/",
+    "file": "categorias/cocina/index.html"
+  },
+  {
+    "route": "/categorias/mascotas/",
+    "file": "categorias/mascotas/index.html"
+  },
+  {
+    "route": "/categorias/electronica/",
+    "file": "categorias/electronica/index.html"
+  },
+  {
+    "route": "/herramientas/guias/soportes.html",
+    "file": "herramientas/guias/soportes.html"
+  },
+  {
+    "route": "/herramientas/guias/multicolor.html",
+    "file": "herramientas/guias/multicolor.html"
+  },
+  {
+    "route": "/herramientas/guias/tpu-flexibles.html",
+    "file": "herramientas/guias/tpu-flexibles.html"
+  },
+  {
+    "route": "/herramientas/guias/boquillas.html",
+    "file": "herramientas/guias/boquillas.html"
+  },
+  {
+    "route": "/herramientas/guias/mantenimiento.html",
+    "file": "herramientas/guias/mantenimiento.html"
+  },
+  {
+    "route": "/og/categorias/cocina.png",
+    "file": "og/categorias/cocina.png",
+    "encoding": "base64"
+  },
+  {
+    "route": "/og/categorias/cosplay.png",
+    "file": "og/categorias/cosplay.png",
+    "encoding": "base64"
+  },
+  {
+    "route": "/og/categorias/decoracion.png",
+    "file": "og/categorias/decoracion.png",
+    "encoding": "base64"
+  },
+  {
+    "route": "/og/categorias/diy-taller.png",
+    "file": "og/categorias/diy-taller.png",
+    "encoding": "base64"
+  },
+  {
+    "route": "/og/categorias/electronica.png",
+    "file": "og/categorias/electronica.png",
+    "encoding": "base64"
+  },
+  {
+    "route": "/og/categorias/gamer.png",
+    "file": "og/categorias/gamer.png",
+    "encoding": "base64"
+  },
+  {
+    "route": "/og/categorias/juguetes.png",
+    "file": "og/categorias/juguetes.png",
+    "encoding": "base64"
+  },
+  {
+    "route": "/og/categorias/llaveros.png",
+    "file": "og/categorias/llaveros.png",
+    "encoding": "base64"
+  },
+  {
+    "route": "/og/categorias/macetas.png",
+    "file": "og/categorias/macetas.png",
+    "encoding": "base64"
+  },
+  {
+    "route": "/og/categorias/mascotas.png",
+    "file": "og/categorias/mascotas.png",
+    "encoding": "base64"
+  },
+  {
+    "route": "/og/categorias/miniaturas.png",
+    "file": "og/categorias/miniaturas.png",
+    "encoding": "base64"
+  },
+  {
+    "route": "/og/categorias/organizacion.png",
+    "file": "og/categorias/organizacion.png",
+    "encoding": "base64"
+  },
+  {
+    "route": "/og/categorias/repuestos.png",
+    "file": "og/categorias/repuestos.png",
+    "encoding": "base64"
+  },
+  {
+    "route": "/og/guias/boquillas.png",
+    "file": "og/guias/boquillas.png",
+    "encoding": "base64"
+  },
+  {
+    "route": "/og/guias/calibrar-filamento.png",
+    "file": "og/guias/calibrar-filamento.png",
+    "encoding": "base64"
+  },
+  {
+    "route": "/og/guias/costos-de-impresion.png",
+    "file": "og/guias/costos-de-impresion.png",
+    "encoding": "base64"
+  },
+  {
+    "route": "/og/guias/cuanto-cobrar-impresion-3d.png",
+    "file": "og/guias/cuanto-cobrar-impresion-3d.png",
+    "encoding": "base64"
+  },
+  {
+    "route": "/og/guias/fidgets-y-holguras.png",
+    "file": "og/guias/fidgets-y-holguras.png",
+    "encoding": "base64"
+  },
+  {
+    "route": "/og/guias/hilos-stringing.png",
+    "file": "og/guias/hilos-stringing.png",
+    "encoding": "base64"
+  },
+  {
+    "route": "/og/guias/licencias-modelos-3d.png",
+    "file": "og/guias/licencias-modelos-3d.png",
+    "encoding": "base64"
+  },
+  {
+    "route": "/og/guias/mantenimiento.png",
+    "file": "og/guias/mantenimiento.png",
+    "encoding": "base64"
+  },
+  {
+    "route": "/og/guias/multicolor.png",
+    "file": "og/guias/multicolor.png",
+    "encoding": "base64"
+  },
+  {
+    "route": "/og/guias/pla-vs-petg.png",
+    "file": "og/guias/pla-vs-petg.png",
+    "encoding": "base64"
+  },
+  {
+    "route": "/og/guias/primera-capa.png",
+    "file": "og/guias/primera-capa.png",
+    "encoding": "base64"
+  },
+  {
+    "route": "/og/guias/secar-filamento.png",
+    "file": "og/guias/secar-filamento.png",
+    "encoding": "base64"
+  },
+  {
+    "route": "/og/guias/soportes.png",
+    "file": "og/guias/soportes.png",
+    "encoding": "base64"
+  },
+  {
+    "route": "/og/guias/tpu-flexibles.png",
+    "file": "og/guias/tpu-flexibles.png",
+    "encoding": "base64"
+  },
+  {
+    "route": "/og/guias/vender-en-mercado-libre.png",
+    "file": "og/guias/vender-en-mercado-libre.png",
+    "encoding": "base64"
+  },
+  {
+    "route": "/og/guias/warping.png",
+    "file": "og/guias/warping.png",
+    "encoding": "base64"
   }
 ]
