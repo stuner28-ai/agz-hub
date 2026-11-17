@@ -30,6 +30,15 @@ Para agregar una página o recurso nuevo, creá el archivo en `src/public/` y su
 
 `package.json` no tiene script `build` a propósito: si lo tuviera, Vercel intentaría ejecutarlo al desplegar. El bundle se genera localmente y se sube ya armado.
 
+## Imágenes para compartir
+
+Cada guía y cada categoría tiene su imagen en `src/public/og/` (1200×630, PNG). Si cambiás un título o agregás una guía o categoría, regenerá las imágenes y sumá las nuevas al manifiesto:
+
+```sh
+python3 scripts/og-images.py .
+node scripts/build.mjs
+```
+
 ## Despliegue
 
 Solo se suben `api/portal.mjs`, `package.json` y `vercel.json` (ver `.vercelignore`). Primero preview, producción solo con aprobación de Alan.

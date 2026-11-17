@@ -102,3 +102,6 @@ dialog :is(input,select,textarea){width:100%;font:inherit;color:inherit;backgrou
 #models .more-menu .model-actions{min-width:170px}
 #models .card .card-bottom a.open-model{font-size:.78rem}
 }
+.guide-links{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,260px),1fr));gap:8px}
+.guide-links a{display:block;padding:12px 14px;border:1px solid var(--edge);border-radius:10px;background:var(--panel);text-decoration:none;font-size:.92rem}
+.guide-links a:hover{border-color:#698651}
