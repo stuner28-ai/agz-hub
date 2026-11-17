@@ -11,84 +11,19 @@ const cachePolicy = {
   versioned: 'public, max-age=31536000, immutable',
   static: 'public, max-age=3600, s-maxage=86400, stale-while-revalidate=604800'
 };
-const printablesEndpoint = 'https://api.printables.com/graphql/';
-const query = `query Models($q: String!, $ordering: SearchChoicesEnum, $offset: Int) {
-  searchPrints2(query: $q, printType: print, limit: 48, offset: $offset, ordering: $ordering) {
-    items { id name slug downloadCount license { name } filesType images { filePath } stls { name } }
-  }
-}`;
-
-function imageUrl(path) {
-  if (!path) return '';
-  const url = new URL(path, 'https://media.printables.com/');
-  if (url.origin !== 'https://media.printables.com') return '';
-  if (url.pathname.includes('/thumbs/')) return url.href;
-  const match = url.pathname.match(/^(.*)\/([^/]+)\.(jpg|jpeg|png|webp)$/i);
-  if (!match) return url.href;
-  url.pathname = match[1] + '/thumbs/inside/640x480/' + match[3].toLowerCase() + '/' + match[2] + '.webp';
-  return url.href;
-}
-
-let printablesRetryAt = 0;
-
-async function searchPrintables(term, top = false, page = 1) {
-  if (Date.now() < printablesRetryAt) throw new Error('Rate limited');
-  const response = await fetch(printablesEndpoint, {
-    method: 'POST',
-    headers: { 'content-type': 'application/json', accept: 'application/json' },
-    body: JSON.stringify({ query, variables: { q: term, ordering: top ? "popular" : "best_match", offset: (page - 1) * 48 } }),
-    signal: AbortSignal.timeout(8500)
-  });
-  if (response.status === 429) printablesRetryAt = Date.now() + 300_000;
-  if (!response.ok) throw new Error('HTTP ' + response.status);
-  const payload = await response.json();
-  const items = payload.data?.searchPrints2?.items;
-  if (!Array.isArray(items)) throw new Error(payload.errors?.[0]?.message ?? 'Missing items');
-  return items.filter(item => item.id && item.name).map(item => {
-    const formats = new Set((item.stls ?? []).map(file => file.name?.split('.').at(-1).toUpperCase())
-      .filter(ext => ['STL', '3MF', 'OBJ', 'STEP'].includes(ext)));
-    if (item.filesType === 'STL' && !formats.size) formats.add('STL');
-    if (item.filesType === 'STEP') formats.add('STEP');
-    return {
-      title: item.name, repo: 'Printables', type: 'gratis', downloads: item.downloadCount, licenseName: item.license?.name ?? '', licenseStatus: classifyLicense(item.license?.name),
-      url: 'https://www.printables.com/model/' + encodeURIComponent(item.id + (item.slug ? '-' + item.slug : '')),
-      image: imageUrl(item.images?.find(image => image.filePath)?.filePath),
-      formats: [...formats]
-    };
-  });
-}
-
-function classifyLicense(name) {
-  const value=(name ?? '').toLowerCase();
-  if (/non.?commercial|\bby-nc\b|private use|personal use/.test(value)) return 'personal';
-  if (/public domain|\bcc0\b|commercial use|gnu|gpl/.test(value)) return 'commercial';
-  if (/creative commons/.test(value) && /attribution/.test(value)) return 'commercial';
-  return 'unknown';
-}
+// Printables no se consulta desde el servidor: sus condiciones (art. 9.1) prohíben la extracción
+// automatizada. Solo se enlaza a su sitio.
+const printablesSearch = term => 'https://www.printables.com/search/models?' + new URLSearchParams({ q: term });
 
 const catalogUrls = [...assets['/app.js'].matchAll(/'(https:\/\/[^'\s]+)', '[^'\n]+'\]/g)].map(match => match[1]);
 
 const thumbnailCache = new Map();
 async function catalogThumbnail(index) {
   const url = catalogUrls[index];
-  if (!url) return new Response(null, { status: 404 });
+  if (!url || /^https:\/\/www\.printables\.com\//.test(url)) return new Response(null, { status: 404 });
   const cached = thumbnailCache.get(index);
   if (cached && cached.expires > Date.now()) return Response.redirect(cached.url,302);
   try {
-    const printId = url.match(/printables\.com\/model\/(\d+)/)?.[1];
-    if (printId) {
-      const response = await fetch(printablesEndpoint, {
-        method:'POST', headers:{'content-type':'application/json'},
-        body:JSON.stringify({query:'query Preview($id: ID!) { print(id: $id) { images { filePath } } }',variables:{id:printId}}),
-        signal:AbortSignal.timeout(7000)
-      });
-      const payload = await response.json();
-      const image = imageUrl(payload.data?.print?.images?.[0]?.filePath);
-      if (image) {
-        thumbnailCache.set(index,{url:image,expires:Date.now()+3600000});
-        return new Response(null,{status:302,headers:{location:image,'cache-control':'public, max-age=3600'}});
-      }
-    }
     const response = await fetch(url, { signal: AbortSignal.timeout(7000) });
     if (!response.ok) return new Response(null, { status: 404 });
     let image = '';
@@ -191,34 +126,6 @@ const site = {
     if (url.pathname === '/api/medicion' && request.method === 'POST') return analyticsCapture(request,url);
     if (url.pathname === '/api/bajas' && request.method === 'POST') return takedownRequest(request,url);
     if (request.method !== 'GET') return new Response(null, { status: 405 });
-    if (url.pathname === '/api/search') {
-      const term = url.searchParams.get('q')?.trim() ?? '';
-      if ((!term && url.searchParams.get('top') !== '1') || term.length > 100) return Response.json({ error: 'Consulta inválida' }, { status: 400 });
-      const page = Math.min(100, Math.max(1, Number.parseInt(url.searchParams.get('page') ?? '1',10) || 1));
-      const repo = url.searchParams.get('source');
-      const price = url.searchParams.get('price');
-      const sources = [];
-      if ((!repo || repo === 'Printables') && price !== 'pago') sources.push(['Printables', searchPrintables(term, url.searchParams.get('top') === '1', page)]);
-      const outcomes = await Promise.allSettled(sources.map(([, result]) => result));
-      const models = [];
-      const unavailable = [];
-      outcomes.forEach((result, index) => {
-        if (result.status === 'fulfilled') models.push(...result.value);
-        else {
-          unavailable.push(sources[index][0]);
-          console.warn(sources[index][0] + ' search unavailable', result.reason.message);
-        }
-      });
-      if (url.searchParams.get('top') === '1') models.sort((a,b)=>(b.downloads??0)-(a.downloads??0));
-      const format = url.searchParams.get('format');
-      const license = url.searchParams.get('license');
-      const filtered = models.filter(model=>
-        (!format || model.formats.includes(format)) &&
-        (!license || model.licenseStatus === license));
-      return Response.json({ models:filtered, unavailable, hasNext:page<100 && models.length===48 }, {
-        headers:{'cache-control':'private, max-age=120'}
-      });
-    }
     const thumb = url.pathname.match(/^\/api\/thumbnail\/(\d{1,2})$/);
     if (thumb) return catalogThumbnail(Number(thumb[1]));
     return await serveSite(url);
@@ -290,15 +197,12 @@ async function serveSite(url) {
       }
     }
   }
-  let degraded = false;
   if (name === '/acerca/' && Object.hasOwn(takedownMessages, url.searchParams.get('baja') ?? '')) {
     const status = url.searchParams.get('baja');
     body = body.replace('<!--BAJA-ESTADO-->', '<p class="form-status ' + status + '" role="status">' + takedownMessages[status] + '</p>');
   }
   if (extension === 'html' && body.includes('<!--MODELOS:')) {
-    const rendered = await categoryModels(body, name);
-    body = rendered.body;
-    degraded = rendered.degraded;
+    body = categoryModels(body);
   }
   if (extension === 'html') {
     body = seoHtml(body, name, section);
@@ -307,7 +211,6 @@ async function serveSite(url) {
       '<div style="max-width:1100px;margin:1rem auto;padding:0 1rem;font-size:.9rem"><label><input id="analytics-consent" type="checkbox"> Permitir estadísticas de uso</label> · <a href="https://www.utilitools.com.ar/privacidad/">Privacidad</a></div><script src="/utilitools-analytics.js" defer></script></body>');
   }
   const cacheControl = status !== 200 ? 'public, max-age=0, s-maxage=300'
-    : degraded ? 'public, max-age=0, s-maxage=60'
     : extension === 'html' ? cachePolicy.html
     : url.searchParams.get('v') === assetVersion ? cachePolicy.versioned
     : cachePolicy.static;
@@ -320,37 +223,15 @@ async function serveSite(url) {
 
 const escapeHtml = value => String(value ?? '').replace(/[&<>"']/g, char =>
   ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[char]);
-const licenseLabels = { commercial: 'Uso comercial', personal: 'No comercial', unknown: 'Licencia a revisar' };
 
-// Completa <!--MODELOS:consulta--> con los modelos más descargados de Printables.
-// Si la fuente no responde a tiempo, deja un enlace al buscador y se cachea menos.
-async function categoryModels(body, name) {
+// Reemplaza <!--MODELOS:consulta--> por enlaces a la búsqueda en Printables y en el buscador propio.
+function categoryModels(body) {
   const marker = body.match(/<!--MODELOS:([^>]{1,80})-->/);
   const query = marker[1].trim();
   const searchLink = '/?q=' + encodeURIComponent(query) + '#catalogo';
-  let models = [];
-  try {
-    const timeout = new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 4000));
-    models = (await Promise.race([searchPrintables(query, true, 1), timeout]))
-      .filter(model => model.image && !/\.gif$/i.test(model.image))
-      .sort((a, b) => (b.downloads ?? 0) - (a.downloads ?? 0))
-      .slice(0, 12);
-  } catch (error) {
-    console.warn('Category models unavailable', name, error.message);
-  }
-  if (!models.length) {
-    return { degraded: true, body: body.replace(marker[0],
-      '<p class="models-fallback">No pudimos cargar los modelos en este momento. <a href="' + searchLink + '">Buscalos en el buscador →</a></p>') };
-  }
-  const cards = models.map(model => '<a class="model-card" href="' + escapeHtml(model.url) + '" target="_blank" rel="noopener noreferrer">' +
-    '<img src="' + escapeHtml(model.image) + '" alt="' + escapeHtml(model.title) + '" width="640" height="480" loading="lazy" decoding="async">' +
-    '<div><strong>' + escapeHtml(model.title) + '</strong><small><span>' + escapeHtml(model.repo) +
-    (model.downloads ? ' · ' + Number(model.downloads).toLocaleString('es-AR') + ' descargas' : '') + '</span>' +
-    '<span class="lic ' + model.licenseStatus + '">' + licenseLabels[model.licenseStatus] + '</span></small></div></a>').join('');
-  const itemList = { '@context': 'https://schema.org', '@type': 'ItemList', itemListElement:
-    models.map((model, index) => ({ '@type': 'ListItem', position: index + 1, url: model.url, name: model.title })) };
-  return { degraded: false, body: body.replace(marker[0], '<div class="model-grid">' + cards + '</div>' +
-    '<script type="application/ld+json">' + JSON.stringify(itemList).replace(/</g, '\\u003c') + '</script>') };
+  return body.replace(marker[0], '<p class="models-fallback">Los modelos más populares de esta categoría están en ' +
+    '<a href="' + escapeHtml(printablesSearch(query)) + '" target="_blank" rel="noopener noreferrer">Printables ↗</a>. ' +
+    'También podés <a href="' + searchLink + '">buscar en el catálogo de UtiliTools y en otros sitios →</a></p>');
 }
 
 const web = 'https://www.utilitools.com.ar';

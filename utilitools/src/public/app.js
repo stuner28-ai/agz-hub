@@ -87,19 +87,16 @@ function card(model) {
   media.className = 'card-media open-model'; media.href = model.url; media.target = '_blank'; media.rel = 'noopener noreferrer';
   media.setAttribute('aria-label', 'Ver ' + model.title + ' en ' + model.repo);
   const placeholder = document.createElement('span');
-  placeholder.className = 'card-placeholder'; placeholder.textContent = model.image ? 'Cargando vista previa…' : 'Sin vista previa · ver en la fuente ↗';
+  placeholder.className = 'card-placeholder'; placeholder.textContent = model.image && !model.image.startsWith('https://media.printables.com/') ? 'Cargando vista previa…' : 'Sin vista previa · ver en la fuente ↗';
   media.append(placeholder);
-  if (model.image) {
+  // Las fotos de Printables no se muestran (ni siquiera de favoritos guardados antes): solo se enlaza a la ficha.
+  if (model.image && !model.image.startsWith('https://media.printables.com/')) {
     const image = document.createElement('img');
     image.alt = ''; image.loading = 'lazy'; image.decoding = 'async'; image.referrerPolicy = 'no-referrer';
     image.width = 640; image.height = 480;
     image.addEventListener('load', () => { image.classList.add('ready'); placeholder.hidden = true; });
     image.addEventListener('error', () => { image.remove(); placeholder.textContent = 'Sin vista previa · ver en la fuente ↗'; });
-    let previewUrl = model.image;
-    if (previewUrl.startsWith('https://media.printables.com/') && !previewUrl.includes('/thumbs/')) {
-      previewUrl = previewUrl.replace(/\/([^/]+)\.(jpg|jpeg|png|webp)$/i, (_, name, ext) => '/thumbs/inside/640x480/' + ext.toLowerCase() + '/' + name + '.webp');
-    }
-    image.src = previewUrl;
+    image.src = model.image;
     media.append(image);
   }
   const selected = favorites.some(x => x.url === model.url);
@@ -173,7 +170,7 @@ document.addEventListener('click', event => {
 });
 
 const catalog = models.map(([title, repo, type, formats, url, keywords], index) => ({
-  title, repo, type, formats, url, keywords, image: '/api/thumbnail/' + index
+  title, repo, type, formats, url, keywords, image: repo === 'Printables' ? '' : '/api/thumbnail/' + index
 }));
 
 function render() {
@@ -216,60 +213,20 @@ function render() {
   document.querySelector('#empty').hidden = waiting || Boolean(filtered.length);
 }
 
-async function searchLive() {
+// La búsqueda en línea en Printables se apagó: sus condiciones prohíben la extracción automatizada.
+// El buscador filtra el catálogo propio y ofrece enlaces de búsqueda a cada sitio.
+function searchLive() {
   activeRequest?.abort();
-  const controller = new AbortController();
-  activeRequest = controller;
-  const term = q.value.trim();
-  if(favoritesOnly.checked){waiting=false;liveStatus.hidden=true;render();return;}
+  activeRequest = null;
   liveResults = [];
-  hasNext=false;
-  searchExhausted=false;
+  hasNext = false;
+  searchExhausted = false;
   waiting = false;
-  liveStatus.hidden = true;
-  const price = document.querySelector('input[name=p]:checked').value;
-  if (topMode==='paid' || price==='pago' || (source.value && source.value!=='Printables') || (!term && !topMode && !format.value && !licenseFilter.value && !source.value && !price)) {
-    render();
-    return;
-  }
-  waiting = true;
-  liveStatus.textContent = 'Buscando modelos…';
-  liveStatus.hidden = false;
+  const term = q.value.trim();
+  liveStatus.hidden = !term || favoritesOnly.checked;
+  if (!liveStatus.hidden) liveStatus.textContent = 'Para ver más modelos, buscá en Printables, Thingiverse y otros sitios con los enlaces de abajo.';
   render();
-
-  try {
-    const limit = format.value || licenseFilter.value ? 4 : 1;
-    const start = pageStart[page-1] ?? 1;
-    for(let offset=start; offset<start+limit; offset++) {
-      const params=new URLSearchParams({
-        q:translate(term), price, source:source.value,
-        top:topMode===true || !term ? '1' : '', page:String(offset),
-        format:format.value, license:licenseFilter.value
-      });
-      const response=await fetch('/api/search?'+params,{signal:controller.signal});
-      if(!response.ok) throw new Error('Search unavailable');
-      const payload=await response.json();
-      if(activeRequest!==controller) return;
-      if(payload.unavailable.length) throw new Error('Source unavailable');
-      liveResults=payload.models;
-      hasNext=Boolean(payload.hasNext);
-      pageStart[page]=offset+1;
-      if(liveResults.length || !hasNext) break;
-    }
-    searchExhausted=!hasNext && !liveResults.length;
-    window.utilitoolsTrack?.('search_completed',{result:liveResults.length?'found':hasNext?'more':'empty'});
-    liveStatus.hidden=Boolean(liveResults.length) || !hasNext;
-    if(!liveStatus.hidden) liveStatus.textContent='Todavía quedan resultados por revisar. Usá Siguiente para continuar con estos filtros.';
-  } catch {
-    if (activeRequest !== controller) return;
-    window.utilitoolsTrack?.('search_completed',{result:'error'});
-    liveStatus.textContent = 'La búsqueda en línea no respondió. Se muestran las coincidencias del catálogo.';
-  } finally {
-    if (activeRequest === controller) {
-      waiting = false;
-      render();
-    }
-  }
+  if (term) window.utilitoolsTrack?.('search_completed', { result: modelList.children.length ? 'found' : 'empty' });
 }
 
 let debounce;
@@ -446,7 +403,6 @@ document.querySelector('#top-paid').addEventListener('click',()=>{
   document.querySelector('#catalogo').scrollIntoView();
 });
 
-document.querySelector('#top-free').addEventListener('click',()=>{topMode=true;favoritesOnly.checked=false;licenseFilter.value="";q.value='';source.value='Printables';format.value='';document.querySelector('input[name=p][value=gratis]').checked=true;runSearch();document.querySelector('#catalogo').scrollIntoView();});
 
 document.querySelector('#previous').addEventListener('click',()=>{if(page>1){page--;runSearch(false);}});
 document.querySelector('#next').addEventListener('click',()=>{page++;runSearch(false);});

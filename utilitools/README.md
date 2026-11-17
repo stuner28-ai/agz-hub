@@ -39,6 +39,10 @@ python3 scripts/og-images.py .
 node scripts/build.mjs
 ```
 
+## Fuentes externas
+
+Printables (Prusa) **no se consulta desde el sitio**: las condiciones generales de Prusa (art. 9.1, vigentes desde el 20/04/2026) prohíben la extracción manual o automatizada del contenido. Por eso no hay búsqueda en línea ni grillas de modelos en las categorías: se enlaza a `printables.com/search/models?q=…` y el buscador filtra solo el catálogo propio de `src/public/app.js`. Para volver a mostrar resultados de Printables hace falta un permiso escrito de Prusa.
+
 ## Despliegue
 
 Solo se suben `api/portal.mjs`, `package.json` y `vercel.json` (ver `.vercelignore`). Primero preview, producción solo con aprobación de Alan.
