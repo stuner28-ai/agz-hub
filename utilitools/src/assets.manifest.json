@@ -123,5 +123,37 @@
     "route": "/herramientas/assets/portada-1120.jpg",
     "file": "herramientas/assets/portada-1120.jpg",
     "encoding": "base64"
+  },
+  {
+    "route": "/herramientas/guias/pla-vs-petg.html",
+    "file": "herramientas/guias/pla-vs-petg.html"
+  },
+  {
+    "route": "/herramientas/guias/cuanto-cobrar-impresion-3d.html",
+    "file": "herramientas/guias/cuanto-cobrar-impresion-3d.html"
+  },
+  {
+    "route": "/herramientas/guias/vender-en-mercado-libre.html",
+    "file": "herramientas/guias/vender-en-mercado-libre.html"
+  },
+  {
+    "route": "/herramientas/guias/primera-capa.html",
+    "file": "herramientas/guias/primera-capa.html"
+  },
+  {
+    "route": "/herramientas/guias/secar-filamento.html",
+    "file": "herramientas/guias/secar-filamento.html"
+  },
+  {
+    "route": "/herramientas/guias/warping.html",
+    "file": "herramientas/guias/warping.html"
+  },
+  {
+    "route": "/herramientas/guias/hilos-stringing.html",
+    "file": "herramientas/guias/hilos-stringing.html"
+  },
+  {
+    "route": "/herramientas/guias/licencias-modelos-3d.html",
+    "file": "herramientas/guias/licencias-modelos-3d.html"
   }
 ]
