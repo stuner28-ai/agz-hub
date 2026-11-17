@@ -1,5 +1,6 @@
 import { load } from 'cheerio';
-import { createHash } from 'node:crypto';
+import { createHash, randomUUID } from 'node:crypto';
+import { put } from '@vercel/blob';
 const assets = __ASSETS__;
 // Cambia con cada versión del sitio: se agrega a las URLs de CSS/JS para poder cachearlos mucho tiempo.
 const assetVersion = createHash('sha1').update(JSON.stringify(assets)).digest('hex').slice(0, 10);
@@ -146,10 +147,49 @@ async function analyticsCapture(request,url) {
   } catch {return new Response(null,{status:502});}
 }
 
+// Pedidos de baja de modelos: se guardan como JSON en un Blob privado de Vercel.
+const takedownReasons = ['autor', 'licencia', 'marca', 'otro'];
+async function takedownRequest(request, url) {
+  const back = status => Response.redirect(url.origin + '/acerca/?baja=' + status + '#bajas', 303);
+  if (request.headers.get('origin') !== url.origin) return new Response(null, { status: 403 });
+  let form;
+  try { form = await request.json(); } catch { return back('error'); }
+  const field = (name, max) => typeof form?.[name] === 'string' ? form[name].trim().slice(0, max) : '';
+  if (field('web', 200)) return back('enviada'); // campo trampa: solo lo completan los bots
+  const entry = {
+    modelo: field('modelo', 500), motivo: field('motivo', 20), detalle: field('detalle', 1500),
+    email: field('email', 200), creado: new Date().toISOString(), sitio: url.hostname
+  };
+  if (!entry.modelo || !takedownReasons.includes(entry.motivo) ||
+    !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(entry.email)) return back('incompleto');
+  if (!process.env.BLOB_READ_WRITE_TOKEN) return back('error');
+  try {
+    // La librería reintenta con espera si Blob falla: cortamos a los 8 s para no dejar al usuario esperando.
+    const controller = new AbortController();
+    let timer;
+    const timeout = new Promise((_, reject) => { timer = setTimeout(() => { controller.abort(); reject(new Error('timeout')); }, 8000); });
+    try {
+      await Promise.race([put('bajas/' + entry.creado.slice(0, 10) + '-' + randomUUID() + '.json', JSON.stringify(entry, null, 2),
+        { access: 'private', contentType: 'application/json', addRandomSuffix: false, abortSignal: controller.signal }), timeout]);
+    } finally { clearTimeout(timer); }
+    return back('enviada');
+  } catch (error) {
+    console.error('Takedown request not stored', error.message);
+    return back('error');
+  }
+}
+
+const takedownMessages = {
+  enviada: 'Recibimos tu pedido. Lo revisamos y, si corresponde, quitamos el modelo del sitio.',
+  incompleto: 'Faltan datos: completá el enlace o nombre del modelo, el motivo y un email válido.',
+  error: 'No pudimos guardar el pedido. Probá de nuevo en unos minutos.'
+};
+
 const site = {
   async fetch(request) {
     const url = new URL(request.url);
     if (url.pathname === '/api/medicion' && request.method === 'POST') return analyticsCapture(request,url);
+    if (url.pathname === '/api/bajas' && request.method === 'POST') return takedownRequest(request,url);
     if (request.method !== 'GET') return new Response(null, { status: 405 });
     if (url.pathname === '/api/search') {
       const term = url.searchParams.get('q')?.trim() ?? '';
@@ -251,6 +291,10 @@ async function serveSite(url) {
     }
   }
   let degraded = false;
+  if (name === '/acerca/' && Object.hasOwn(takedownMessages, url.searchParams.get('baja') ?? '')) {
+    const status = url.searchParams.get('baja');
+    body = body.replace('<!--BAJA-ESTADO-->', '<p class="form-status ' + status + '" role="status">' + takedownMessages[status] + '</p>');
+  }
   if (extension === 'html' && body.includes('<!--MODELOS:')) {
     const rendered = await categoryModels(body, name);
     body = rendered.body;
@@ -468,6 +512,13 @@ export default async function handler(req, res) {
     if(Buffer.byteLength(body)>1500) return res.status(413).end();
     options.body=body;
     options.headers={origin:req.headers.origin ?? ''};
+  }
+  if(method==='POST' && incoming.pathname==='/api/bajas') {
+    const fields=req.body && typeof req.body==='object' ? req.body : Object.fromEntries(new URLSearchParams(String(req.body ?? '')));
+    const body=JSON.stringify(fields);
+    if(Buffer.byteLength(body)>4000) return res.status(413).end();
+    options.body=body;
+    options.headers={origin:req.headers.origin ?? '','content-type':'application/json'};
   }
   const response = await site.fetch(new Request(incoming, options));
   res.status(response.status);

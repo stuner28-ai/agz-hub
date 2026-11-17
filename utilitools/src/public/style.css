@@ -63,3 +63,5 @@ dialog :is(input,select,textarea){width:100%;font:inherit;color:inherit;backgrou
 .button-lime:hover{color:#18200c;background:#d8ff96}
 .category-page .categories{border-top:0;margin-top:0;padding-top:0}
 @media(min-width:1100px){.model-grid{grid-template-columns:repeat(4,1fr)}}
+
+.takedown-form{display:grid;gap:14px;max-width:620px;margin:18px 0 0;padding:20px;border:1px solid var(--edge);border-radius:14px;background:var(--panel)}.takedown-form label{display:grid;gap:6px;font-size:.9rem;color:var(--muted)}.takedown-form :is(input,select,textarea){width:100%;font:inherit;color:#edf3f8;background:#11161c;border:1px solid var(--edge);border-radius:8px;padding:10px}.takedown-form button{justify-self:start;background:var(--lime);color:#18200c;border:0;border-radius:8px;padding:11px 16px;font-weight:700}.takedown-form .trap{position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden}.form-status{padding:12px 14px;border-radius:10px;border:1px solid var(--edge);background:var(--panel)}.form-status.enviada{border-color:#698651;color:var(--lime)}.form-status:is(.incompleto,.error){border-color:#8a5a3c;color:#ffcf96}
