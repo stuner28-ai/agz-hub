@@ -65,3 +65,41 @@ dialog :is(input,select,textarea){width:100%;font:inherit;color:inherit;backgrou
 @media(min-width:1100px){.model-grid{grid-template-columns:repeat(4,1fr)}}
 
 .takedown-form{display:grid;gap:14px;max-width:620px;margin:18px 0 0;padding:20px;border:1px solid var(--edge);border-radius:14px;background:var(--panel)}.takedown-form label{display:grid;gap:6px;font-size:.9rem;color:var(--muted)}.takedown-form :is(input,select,textarea){width:100%;font:inherit;color:#edf3f8;background:#11161c;border:1px solid var(--edge);border-radius:8px;padding:10px}.takedown-form button{justify-self:start;background:var(--lime);color:#18200c;border:0;border-radius:8px;padding:11px 16px;font-weight:700}.takedown-form .trap{position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden}.form-status{padding:12px 14px;border-radius:10px;border:1px solid var(--edge);background:var(--panel)}.form-status.enviada{border-color:#698651;color:var(--lime)}.form-status:is(.incompleto,.error){border-color:#8a5a3c;color:#ffcf96}
+
+/* Tarjeta de modelo (paso E): imagen enlazada, favorito sobre la imagen y acciones secundarias en "⋯". */
+.card{position:relative;padding:0;overflow:visible}
+.card-media{display:block;position:relative;aspect-ratio:4/3;background:#151a20;border-radius:13px 13px 0 0;overflow:hidden}
+.card-media img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity .2s,transform .3s}
+.card-media img.ready{opacity:1}
+.card:hover .card-media img{transform:scale(1.03)}
+.card-placeholder{position:absolute;inset:0;display:grid;place-items:center;padding:16px;text-align:center;color:var(--muted);font-size:.8rem}
+.card .fav{position:absolute;top:10px;right:10px;width:38px;height:38px;border-radius:50%;border:1px solid #ffffff30;background:#101419d0;color:#edf3f8;font-size:18px;line-height:1;display:grid;place-items:center}
+.card .fav:hover,.card .fav.on{color:var(--lime);border-color:var(--lime)}
+.card .details{padding:14px 15px 12px;gap:6px}
+.card h3{font-size:1.05rem;line-height:1.3;margin:4px 0 0}
+.card .details>p{margin:0}
+.card-meta{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin-top:4px;font-size:.75rem;color:var(--muted)}
+.card-meta .downloads{margin:0}
+.lic{font:500 .66rem var(--mono);padding:3px 6px;border-radius:4px;background:#243423;color:var(--lime);white-space:nowrap}
+.lic.personal{background:#3d2c21;color:#ffcf96}
+.lic.unknown{background:#262f38;color:var(--muted)}
+.card .card-bottom{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:auto;padding-top:10px;border-top:1px solid var(--edge)}
+.more-menu{position:relative}
+.more-menu summary{list-style:none;cursor:pointer;width:34px;height:30px;display:grid;place-items:center;border:1px solid var(--edge);border-radius:8px;color:var(--muted);font-size:1.1rem;line-height:1}
+.more-menu summary::-webkit-details-marker{display:none}
+.more-menu summary:hover,.more-menu[open] summary{color:var(--lime);border-color:#698651}
+.more-menu .model-actions{position:absolute;right:0;bottom:calc(100% + 6px);z-index:5;display:flex;flex-direction:column;align-items:stretch;gap:2px;margin:0;min-width:210px;padding:6px;background:#1c242c;border:1px solid var(--edge);border-radius:10px;box-shadow:0 12px 30px #0008}
+.more-menu .model-actions :is(a,button){display:block;text-align:left;padding:8px 10px;border:0;border-radius:6px;background:none;color:#edf3f8;font-size:.85rem;font-weight:500;text-decoration:none}
+.more-menu .model-actions :is(a,button):hover{background:#26313a;color:var(--lime)}
+.more-menu .license{padding:6px 10px 2px;color:var(--muted)}
+@media(max-width:560px){
+#models.grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+#models .card .details{padding:10px 10px 8px}
+#models .card h3{font-size:.9rem}
+#models .card .details>p{display:none}
+#models .card-top{font-size:.68rem}
+#models .card .fav{width:32px;height:32px;font-size:15px;top:6px;right:6px}
+#models .card-meta .formats{display:none}
+#models .more-menu .model-actions{min-width:170px}
+#models .card .card-bottom a.open-model{font-size:.78rem}
+}

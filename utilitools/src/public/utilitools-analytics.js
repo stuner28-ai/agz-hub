@@ -49,7 +49,7 @@
   document.addEventListener('click',event=>{
     const link=event.target.closest?.('a');
     if(!link) return;
-    if(link.matches('.card-bottom a,.preview-original')) track('model_opened');
+    if(link.matches('a.open-model')) track('model_opened');
     if(link.matches('.model-actions a')) track('calculator_opened');
   });
   pageView();

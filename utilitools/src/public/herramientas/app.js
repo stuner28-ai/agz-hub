@@ -191,7 +191,12 @@ function makerCost({grams,spool,extraGrams,extraSpool,hours,hour,watts,kwh,labor
 }
 function calculateCost() {
   const output=byId('costResult');
-  if(!costForm.checkValidity()) { output.textContent='Revisá los importes, unidades y porcentajes.'; return; }
+  if(!costForm.checkValidity()) {
+    const invalid=[...costForm.elements].find(element=>element.willValidate && !element.checkValidity());
+    const label=invalid?.closest('label')?.firstChild?.textContent?.trim();
+    output.textContent=label ? 'Completá o corregí «'+label+'» para ver el precio.' : 'Revisá los importes, unidades y porcentajes.';
+    return;
+  }
   const input=Object.fromEntries([...new FormData(costForm)].map(([key,value])=>[key,Number(value)]));
   const cost=makerCost(input);
   const pesos=new Intl.NumberFormat('es-AR',{style:'currency',currency:'ARS',maximumFractionDigits:0});
@@ -200,10 +205,27 @@ function calculateCost() {
     ['Filamento por intento',cost.filament],['Energía por intento',cost.energy],['Desgaste por intento',cost.machine],['Mano de obra por intento',cost.labor],
     ['Producción con fallos estimados',cost.batch],['Costo unitario con embalaje',cost.unit],['Punto de equilibrio por pedido',Math.ceil(cost.floor)]
   ];
-  output.innerHTML='<dl class="data">'+rows.map(([label,value])=>'<div><dt>'+label+'</dt><dd>'+money(value)+'</dd></div>').join('')+'</dl>';
-  const result=document.createElement('p');
-  result.textContent=cost.price===null?'La comisión y el margen deben sumar menos de 100%.':'Precio sugerido por pedido de '+input.units+' unidad(es): '+money(cost.price)+' · Equivale a '+money(cost.price/input.units)+' por pieza.';
-  output.append(result);
+  const perPiece=cost.price===null?null:cost.price/input.units;
+  const summary=document.createElement('div');
+  summary.className='price-summary';
+  if(cost.price===null) {
+    summary.innerHTML='<p class="price-error"></p>';
+    summary.querySelector('p').textContent='La comisión y el margen deben sumar menos de 100%.';
+  } else {
+    summary.innerHTML='<div><span>Precio sugerido por pedido</span><strong></strong><small></small></div><div><span>Por pieza</span><strong></strong><small></small></div>';
+    const [order,piece]=summary.querySelectorAll('div');
+    order.querySelector('strong').textContent=money(cost.price);
+    order.querySelector('small').textContent=input.units+(input.units===1?' unidad':' unidades')+' · '+input.margin+' % de margen';
+    piece.querySelector('strong').textContent=money(perPiece);
+    piece.querySelector('small').textContent='Costo unitario '+money(cost.unit);
+  }
+  const breakdown=document.createElement('dl');
+  breakdown.className='cost-breakdown';
+  breakdown.innerHTML=rows.map(([label,value])=>'<div><dt>'+label+'</dt><dd>'+money(value)+'</dd></div>').join('');
+  const detail=document.createElement('p');
+  detail.className='visually-hidden';
+  detail.textContent=cost.price===null?'':'Precio sugerido por pedido de '+input.units+' unidad(es): '+money(cost.price)+' · Equivale a '+money(perPiece)+' por pieza.';
+  output.replaceChildren(summary,breakdown,detail);
 }
 costForm.addEventListener('input',calculateCost);
 costForm.addEventListener('submit',event=>event.preventDefault());
@@ -216,6 +238,26 @@ calculateCost();
   const input = document.getElementById('slicer-file');
   const fileName = document.getElementById('slicer-file-name');
   input?.addEventListener('change', () => { if (fileName) fileName.textContent = input.files?.[0]?.name ?? 'Ningún archivo seleccionado'; });
+  // Arrastrar y soltar el G-code sobre el recuadro de importación.
+  const dropZone = input?.closest('.quote-box');
+  if (dropZone && 'DataTransfer' in window) {
+    dropZone.classList.add('drop-zone');
+    const hasFile = event => [...(event.dataTransfer?.types ?? [])].includes('Files');
+    for (const type of ['dragenter', 'dragover']) dropZone.addEventListener(type, event => {
+      if (!hasFile(event)) return;
+      event.preventDefault(); dropZone.classList.add('dragging');
+    });
+    dropZone.addEventListener('dragleave', event => { if (!dropZone.contains(event.relatedTarget)) dropZone.classList.remove('dragging'); });
+    dropZone.addEventListener('drop', event => {
+      if (!hasFile(event)) return;
+      event.preventDefault(); dropZone.classList.remove('dragging');
+      const file = event.dataTransfer.files[0];
+      if (!file) return;
+      const transfer = new DataTransfer(); transfer.items.add(file);
+      input.files = transfer.files;
+      input.dispatchEvent(new Event('change', { bubbles: true }));
+    });
+  }
   const status = document.getElementById('import-status');
   const plate = document.getElementById('slicer-plate');
   const settingsStatus = document.getElementById('settings-status');

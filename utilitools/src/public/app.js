@@ -78,95 +78,99 @@ function saveFavorite(model) {
   render();
 }
 
+const licenseBadges = { commercial: 'Uso comercial', personal: 'No comercial', unknown: 'Licencia a revisar' };
+
 function card(model) {
   const article = document.createElement('article');
   article.className = 'card';
-  article.innerHTML = '<div class="preview"><span>Vista previa no disponible</span></div><div class="details"><div class="card-top"><span></span><span class="price"></span></div><h3></h3><p></p><div class="card-bottom"><div class="formats"></div><a target="_blank" rel="noopener noreferrer">Ver ficha ↗</a></div></div>';
-  const preview = article.querySelector('.preview');
-  const previewStatus = preview.querySelector('span');
-  const original = document.createElement('a');
-  original.href=model.url; original.target='_blank'; original.rel='noopener noreferrer';
-  original.className='preview-original'; original.textContent='Ver imágenes en la fuente ↗';
-  preview.append(original);
+  const media = document.createElement('a');
+  media.className = 'card-media open-model'; media.href = model.url; media.target = '_blank'; media.rel = 'noopener noreferrer';
+  media.setAttribute('aria-label', 'Ver ' + model.title + ' en ' + model.repo);
+  const placeholder = document.createElement('span');
+  placeholder.className = 'card-placeholder'; placeholder.textContent = model.image ? 'Cargando vista previa…' : 'Sin vista previa · ver en la fuente ↗';
+  media.append(placeholder);
   if (model.image) {
-    previewStatus.textContent='Cargando vista previa…';
     const image = document.createElement('img');
-    image.alt = model.title;
-    image.loading = 'lazy';
-    image.decoding = 'async';
-    image.referrerPolicy = 'no-referrer';
-    image.width=640; image.height=480;
-    image.addEventListener('load', () => {
-      image.classList.add('ready'); previewStatus.hidden=true; original.hidden=true;
-    });
-    image.addEventListener('error', () => { image.remove(); previewStatus.textContent='La fuente no ofrece una vista previa disponible.'; });
-    let previewUrl=model.image;
-    if(previewUrl.startsWith('https://media.printables.com/') && !previewUrl.includes('/thumbs/')) {
-      previewUrl=previewUrl.replace(/\/([^/]+)\.(jpg|jpeg|png|webp)$/i,(_,name,ext)=>'/thumbs/inside/640x480/'+ext.toLowerCase()+'/'+name+'.webp');
+    image.alt = ''; image.loading = 'lazy'; image.decoding = 'async'; image.referrerPolicy = 'no-referrer';
+    image.width = 640; image.height = 480;
+    image.addEventListener('load', () => { image.classList.add('ready'); placeholder.hidden = true; });
+    image.addEventListener('error', () => { image.remove(); placeholder.textContent = 'Sin vista previa · ver en la fuente ↗'; });
+    let previewUrl = model.image;
+    if (previewUrl.startsWith('https://media.printables.com/') && !previewUrl.includes('/thumbs/')) {
+      previewUrl = previewUrl.replace(/\/([^/]+)\.(jpg|jpeg|png|webp)$/i, (_, name, ext) => '/thumbs/inside/640x480/' + ext.toLowerCase() + '/' + name + '.webp');
     }
     image.src = previewUrl;
-    article.querySelector('.preview').append(image);
+    media.append(image);
   }
-  article.querySelector('.card-top > span').textContent = model.repo;
-  const badge = article.querySelector('.price');
-  badge.textContent = model.type === 'gratis' ? 'GRATIS' : 'PAGO';
-  badge.classList.add(model.type);
-  article.querySelector('h3').textContent = model.title;
-  if (Number.isFinite(model.downloads)) { const d=document.createElement('div'); d.className='downloads'; d.textContent=new Intl.NumberFormat('es-AR').format(model.downloads)+' descargas · Printables'; article.querySelector('.details').append(d); }
-  const description = article.querySelector('p');
-  description.textContent = model.keywords;
-  description.hidden = !model.keywords;
-  const formats = model.formats.length ? model.formats : ['Ver ficha'];
-  for (const format of formats) {
-    const badge = document.createElement('span');
-    badge.textContent = format;
-    article.querySelector('.formats').append(badge);
+  const selected = favorites.some(x => x.url === model.url);
+  const favorite = document.createElement('button');
+  favorite.type = 'button'; favorite.className = 'fav' + (selected ? ' on' : '');
+  favorite.textContent = selected ? '♥' : '♡';
+  favorite.setAttribute('aria-pressed', String(selected));
+  favorite.setAttribute('aria-label', (selected ? 'Quitar de favoritos ' : 'Guardar en favoritos ') + model.title);
+  favorite.title = selected ? 'Quitar de favoritos' : 'Guardar en favoritos';
+  favorite.addEventListener('click', () => saveFavorite(model));
+
+  const details = document.createElement('div');
+  details.className = 'details';
+  const top = document.createElement('div'); top.className = 'card-top';
+  const repo = document.createElement('span'); repo.textContent = model.repo;
+  const badge = document.createElement('span'); badge.className = 'price ' + model.type; badge.textContent = model.type === 'gratis' ? 'GRATIS' : 'PAGO';
+  top.append(repo, badge);
+  const title = document.createElement('h3'); title.textContent = model.title;
+  details.append(top, title);
+  if (model.keywords) { const p = document.createElement('p'); p.textContent = model.keywords; details.append(p); }
+  if (topMode === 'paid' && model.keywords) {
+    const reason = document.createElement('p');
+    reason.textContent = 'Elegido como ejemplo de ' + (model.title.includes('Maceta') ? 'decoración para el hogar' : 'juguete con mecanismo clicker') + '.';
+    details.append(reason);
   }
-  const link = article.querySelector('.card-bottom a');
-  link.href = model.url;
-  link.setAttribute('aria-label', 'Ver ' + model.title + ' en ' + model.repo);
-  const favorite=document.createElement('button');
-  favorite.className='reset';
-  const selected=favorites.some(x=>x.url===model.url);
-  favorite.textContent=selected?'♥ Guardado':'♡ Guardar';
-  favorite.setAttribute('aria-pressed',String(selected));
-  favorite.setAttribute('aria-label',(selected?'Quitar de favoritos ':'Guardar en favoritos ')+model.title);
-  favorite.addEventListener('click',()=>saveFavorite(model));
-  article.querySelector('.details').append(favorite);
-  if(topMode==='paid' && model.keywords) {
-    const reason=document.createElement('p');
-    reason.textContent=model.keywords+' · Elegido como ejemplo de '+(model.title.includes('Maceta')?'decoración para el hogar':'juguete con mecanismo clicker')+'.';
-    article.querySelector('.details').append(reason);
-  }
-  const license=document.createElement('p');
-  license.className='license';
-  license.textContent=model.licenseName?'Licencia · '+model.licenseName:'Licencia por verificar';
-  article.querySelector('.details').append(license);
-  const actions=document.createElement('div');
-  actions.className='model-actions';
-  const calculator=document.createElement('a');
-  calculator.href='https://calculadora.utilitools.com.ar/?'+new URLSearchParams({modelo:model.title, ficha:model.url})+'#costos';
-  calculator.textContent='Calcular costo ↗';
-  const collect=document.createElement('button');
-  collect.className='reset'; collect.textContent='Guardar en colección';
-  collect.addEventListener('click',()=>openCollectionEditor(model));
-  actions.append(calculator,collect);
-  if(model.note) {
-    const note=document.createElement('p');
-    note.className='model-note'; note.textContent='Nota: '+model.note; actions.append(note);
-  }
-  const collection=activeCollection();
-  if(collection && !sharedView && favoritesOnly.checked) {
-    const remove=document.createElement('button'); remove.className='reset'; remove.textContent='Quitar de la colección';
-    remove.addEventListener('click',()=>{
-      collection.entries=collection.entries.filter(entry=>entry.url!==model.url);
+  const meta = document.createElement('div'); meta.className = 'card-meta';
+  if (Number.isFinite(model.downloads)) { const d = document.createElement('span'); d.className = 'downloads'; d.textContent = new Intl.NumberFormat('es-AR').format(model.downloads) + ' descargas'; meta.append(d); }
+  const status = model.licenseStatus ?? 'unknown';
+  const lic = document.createElement('span'); lic.className = 'lic ' + status; lic.textContent = licenseBadges[status] ?? licenseBadges.unknown;
+  if (model.licenseName) lic.title = model.licenseName;
+  meta.append(lic);
+  const formats = document.createElement('div'); formats.className = 'formats';
+  for (const format of model.formats) { const f = document.createElement('span'); f.textContent = format; formats.append(f); }
+  if (model.formats.length) meta.append(formats);
+  details.append(meta);
+  if (model.note) { const note = document.createElement('p'); note.className = 'model-note'; note.textContent = 'Nota: ' + model.note; details.append(note); }
+
+  const bottom = document.createElement('div'); bottom.className = 'card-bottom';
+  const open = document.createElement('a');
+  open.className = 'open-model'; open.href = model.url; open.target = '_blank'; open.rel = 'noopener noreferrer';
+  open.textContent = 'Ver ficha ↗'; open.setAttribute('aria-label', 'Ver ' + model.title + ' en ' + model.repo);
+  const menu = document.createElement('details'); menu.className = 'more-menu';
+  const summary = document.createElement('summary'); summary.textContent = '⋯'; summary.setAttribute('aria-label', 'Más acciones para ' + model.title); summary.title = 'Más acciones';
+  const actions = document.createElement('div'); actions.className = 'model-actions';
+  const calculator = document.createElement('a');
+  calculator.href = 'https://calculadora.utilitools.com.ar/?' + new URLSearchParams({ modelo: model.title, ficha: model.url }) + '#costos';
+  calculator.textContent = 'Calcular costo';
+  const collect = document.createElement('button'); collect.type = 'button'; collect.textContent = 'Guardar en colección';
+  collect.addEventListener('click', () => { menu.open = false; openCollectionEditor(model); });
+  actions.append(calculator, collect);
+  const collection = activeCollection();
+  if (collection && !sharedView && favoritesOnly.checked) {
+    const remove = document.createElement('button'); remove.type = 'button'; remove.textContent = 'Quitar de la colección';
+    remove.addEventListener('click', () => {
+      collection.entries = collection.entries.filter(entry => entry.url !== model.url);
       saveCollections(); render();
     });
     actions.append(remove);
   }
-  article.querySelector('.details').append(actions);
+  if (model.licenseName) { const ln = document.createElement('p'); ln.className = 'license'; ln.textContent = 'Licencia: ' + model.licenseName; actions.append(ln); }
+  menu.append(summary, actions);
+  bottom.append(open, menu);
+  details.append(bottom);
+  article.append(media, favorite, details);
   return article;
 }
+
+// Cierra los menús "⋯" abiertos al tocar fuera de ellos.
+document.addEventListener('click', event => {
+  for (const open of document.querySelectorAll('.more-menu[open]')) if (!open.contains(event.target)) open.open = false;
+});
 
 const catalog = models.map(([title, repo, type, formats, url, keywords], index) => ({
   title, repo, type, formats, url, keywords, image: '/api/thumbnail/' + index
