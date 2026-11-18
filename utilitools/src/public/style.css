@@ -105,3 +105,4 @@ dialog :is(input,select,textarea){width:100%;font:inherit;color:inherit;backgrou
 .guide-links{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,260px),1fr));gap:8px}
 .guide-links a{display:block;padding:12px 14px;border:1px solid var(--edge);border-radius:10px;background:var(--panel);text-decoration:none;font-size:.92rem}
 .guide-links a:hover{border-color:#698651}
+.maintenance{margin:14px 0 0;padding:12px 14px;border:1px solid #6b5a2a;border-left:4px solid #f2c94c;border-radius:10px;background:#2a2516;color:#f3e6bf;font-size:.9rem;line-height:1.45;max-width:680px}.maintenance strong{color:#ffd970}

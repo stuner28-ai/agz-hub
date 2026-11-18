@@ -224,7 +224,7 @@ function searchLive() {
   waiting = false;
   const term = q.value.trim();
   liveStatus.hidden = !term || favoritesOnly.checked;
-  if (!liveStatus.hidden) liveStatus.textContent = 'Para ver más modelos, buscá en Printables, Thingiverse y otros sitios con los enlaces de abajo.';
+  if (!liveStatus.hidden) liveStatus.textContent = 'El buscador en línea está en mantenimiento. Para ver más modelos, buscá en Printables, Thingiverse y otros sitios con los enlaces de abajo.';
   render();
   if (term) window.utilitoolsTrack?.('search_completed', { result: modelList.children.length ? 'found' : 'empty' });
 }
