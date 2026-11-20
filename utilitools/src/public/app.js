@@ -86,19 +86,10 @@ function card(model) {
   const media = document.createElement('a');
   media.className = 'card-media open-model'; media.href = model.url; media.target = '_blank'; media.rel = 'noopener noreferrer';
   media.setAttribute('aria-label', 'Ver ' + model.title + ' en ' + model.repo);
+  // Sin fotos de otros sitios: sus condiciones prohíben copiarlas o extraerlas. La tarjeta enlaza a la ficha original.
   const placeholder = document.createElement('span');
-  placeholder.className = 'card-placeholder'; placeholder.textContent = model.image && !model.image.startsWith('https://media.printables.com/') ? 'Cargando vista previa…' : 'Sin vista previa · ver en la fuente ↗';
+  placeholder.className = 'card-placeholder'; placeholder.textContent = 'Ver ficha en ' + model.repo + ' ↗';
   media.append(placeholder);
-  // Las fotos de Printables no se muestran (ni siquiera de favoritos guardados antes): solo se enlaza a la ficha.
-  if (model.image && !model.image.startsWith('https://media.printables.com/')) {
-    const image = document.createElement('img');
-    image.alt = ''; image.loading = 'lazy'; image.decoding = 'async'; image.referrerPolicy = 'no-referrer';
-    image.width = 640; image.height = 480;
-    image.addEventListener('load', () => { image.classList.add('ready'); placeholder.hidden = true; });
-    image.addEventListener('error', () => { image.remove(); placeholder.textContent = 'Sin vista previa · ver en la fuente ↗'; });
-    image.src = model.image;
-    media.append(image);
-  }
   const selected = favorites.some(x => x.url === model.url);
   const favorite = document.createElement('button');
   favorite.type = 'button'; favorite.className = 'fav' + (selected ? ' on' : '');
@@ -169,8 +160,8 @@ document.addEventListener('click', event => {
   for (const open of document.querySelectorAll('.more-menu[open]')) if (!open.contains(event.target)) open.open = false;
 });
 
-const catalog = models.map(([title, repo, type, formats, url, keywords], index) => ({
-  title, repo, type, formats, url, keywords, image: repo === 'Printables' ? '' : '/api/thumbnail/' + index
+const catalog = models.map(([title, repo, type, formats, url, keywords]) => ({
+  title, repo, type, formats, url, keywords, image: ''
 }));
 
 function render() {
@@ -298,7 +289,7 @@ function readCollections(raw) {
         title:entry.title.slice(0,200), url:entry.url, repo:String(entry.repo ?? '').slice(0,50),
         type:entry.type === 'pago' ? 'pago' : 'gratis',
         formats:Array.isArray(entry.formats) ? entry.formats.filter(f=>['STL','3MF','OBJ','STEP'].includes(f)) : [],
-        image:typeof entry.image === 'string' && /^(https:\/\/(media\.printables\.com|images\.cults3d\.com)\/|\/api\/thumbnail\/\d+$)/.test(entry.image) ? entry.image : '',
+        image:'',
         licenseStatus:['personal','commercial'].includes(entry.licenseStatus) ? entry.licenseStatus : 'unknown',
         licenseName:String(entry.licenseName ?? '').slice(0,150),
         note:String(entry.note ?? '').slice(0,300)

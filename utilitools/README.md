@@ -41,7 +41,14 @@ node scripts/build.mjs
 
 ## Fuentes externas
 
-Printables (Prusa) **no se consulta desde el sitio**: las condiciones generales de Prusa (art. 9.1, vigentes desde el 20/04/2026) prohíben la extracción manual o automatizada del contenido. Por eso no hay búsqueda en línea ni grillas de modelos en las categorías: se enlaza a `printables.com/search/models?q=…` y el buscador filtra solo el catálogo propio de `src/public/app.js`. Para volver a mostrar resultados de Printables hace falta un permiso escrito de Prusa.
+El sitio **no consulta ni copia contenido de otras plataformas**: no hay búsqueda en línea, ni miniaturas, ni lectura de páginas ajenas. Solo enlaza a las fichas y a las búsquedas de cada sitio.
+
+- Printables (Prusa): las condiciones generales (art. 9.1, vigentes desde el 20/04/2026) prohíben la extracción manual o automatizada del contenido. Volver a mostrar resultados requiere permiso escrito de Prusa.
+- Cults3D: su página "no-ai" prohíbe scrapear, bajar o copiar imágenes y textos sin permiso del autor. Alternativa: su API oficial con clave.
+- Thingiverse: sus términos de uso (3.3(b)(vi) y (vii)) prohíben el scraping y la agregación sistemática con fines comerciales sin permiso escrito. Alternativa: su API con token, con resultados separados y atribuidos.
+- Shapekit: no publica términos; sus modelos son CC BY-NC 4.0.
+
+Antes de volver a mostrar fotos o resultados de cualquier fuente, revisar sus condiciones y usar solo una API oficial o un permiso escrito.
 
 ## Despliegue
 

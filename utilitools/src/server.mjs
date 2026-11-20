@@ -1,4 +1,3 @@
-import { load } from 'cheerio';
 import { createHash, randomUUID } from 'node:crypto';
 import { put } from '@vercel/blob';
 const assets = __ASSETS__;
@@ -14,32 +13,6 @@ const cachePolicy = {
 // Printables no se consulta desde el servidor: sus condiciones (art. 9.1) prohíben la extracción
 // automatizada. Solo se enlaza a su sitio.
 const printablesSearch = term => 'https://www.printables.com/search/models?' + new URLSearchParams({ q: term });
-
-const catalogUrls = [...assets['/app.js'].matchAll(/'(https:\/\/[^'\s]+)', '[^'\n]+'\]/g)].map(match => match[1]);
-
-const thumbnailCache = new Map();
-async function catalogThumbnail(index) {
-  const url = catalogUrls[index];
-  if (!url || /^https:\/\/www\.printables\.com\//.test(url)) return new Response(null, { status: 404 });
-  const cached = thumbnailCache.get(index);
-  if (cached && cached.expires > Date.now()) return Response.redirect(cached.url,302);
-  try {
-    const response = await fetch(url, { signal: AbortSignal.timeout(7000) });
-    if (!response.ok) return new Response(null, { status: 404 });
-    let image = '';
-    const handler = { element(element) { image ||= element.getAttribute('content') ?? ''; } };
-    await new HTMLRewriter().on('meta[property="og:image"]', handler)
-      .on('meta[name="twitter:image"]', handler).transform(response).text();
-    if (!image) return new Response(null, { status: 404 });
-    const resolved = new URL(image, response.url || url);
-    if (resolved.protocol === 'https:') {
-      return new Response(null, { status: 302, headers: { location: resolved.href, 'cache-control': 'private, max-age=86400' } });
-    }
-  } catch (error) {
-    console.warn('Catalog image unavailable', index, error.message);
-  }
-  return new Response(null, { status: 404 });
-}
 
 const analyticsEvents = {
   page_view: [['channel',['search','social','referral','direct','internal']],
@@ -126,8 +99,6 @@ const site = {
     if (url.pathname === '/api/medicion' && request.method === 'POST') return analyticsCapture(request,url);
     if (url.pathname === '/api/bajas' && request.method === 'POST') return takedownRequest(request,url);
     if (request.method !== 'GET') return new Response(null, { status: 405 });
-    const thumb = url.pathname.match(/^\/api\/thumbnail\/(\d{1,2})$/);
-    if (thumb) return catalogThumbnail(Number(thumb[1]));
     return await serveSite(url);
   }
 };
@@ -362,36 +333,6 @@ function crawlFile(url, section) {
   return new Response(content, { headers: { ...headers, 'content-type':'application/xml; charset=utf-8' } });
 }
 
-class HTMLRewriter {
-  handlers = [];
-  on(selector, handlers) { this.handlers.push([selector, handlers]); return this; }
-  transform(response) {
-    return { text: async () => {
-      const $ = load(await response.text());
-      const walk = node => {
-        const end = [];
-        if (node.type === 'tag' || node.type === 'script' || node.type === 'style') {
-          for (const [selector, handlers] of this.handlers) {
-            if (handlers.element && $(node).is(selector)) handlers.element({
-              getAttribute: name => $(node).attr(name),
-              onEndTag: callback => end.push(callback)
-            });
-          }
-        }
-        if (node.type === 'text') {
-          for (const [selector, handlers] of this.handlers) {
-            if (handlers.text && $(node.parent).closest(selector).length) {
-              handlers.text({ text: node.data });
-            }
-          }
-        }
-        for (const child of node.children ?? []) walk(child);
-        for (const callback of end) callback();
-      };
-      walk($.root().get(0));
-    } };
-  }
-}
 
 export default async function handler(req, res) {
   const incoming = new URL(req.url, 'https://' + req.headers.host);
